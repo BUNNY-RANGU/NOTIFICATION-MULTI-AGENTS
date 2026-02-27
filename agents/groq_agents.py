@@ -37,6 +37,7 @@ def call_groq(system_prompt, user_message):
 
     for attempt in range(1, MAX_RETRIES + 1):
         try:
+            client = get_groq_client()
             response = client.chat.completions.create(
                 model=GROQ_MODEL,
                 messages=[

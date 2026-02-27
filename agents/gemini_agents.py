@@ -4,8 +4,19 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-# Using Groq for ALL agents — faster + no quota issues!
-groq_client = Groq(api_key=os.getenv("GROQ_API_KEY"))
+# Lazy initialization of Groq client
+_client = None
+
+def get_groq_client():
+    """Lazy initialization of Groq client to avoid SSL hang during import."""
+    global _client
+    if _client is None:
+        api_key = os.getenv("GROQ_API_KEY")
+        if not api_key:
+            raise ValueError("GROQ_API_KEY not found in environment variables")
+        _client = Groq(api_key=api_key)
+    return _client
+
 GROQ_MODEL = "llama-3.3-70b-versatile"
 
 
@@ -18,7 +29,8 @@ def call_gemini(prompt):
 
     for attempt in range(1, MAX_RETRIES + 1):
         try:
-            response = groq_client.chat.completions.create(
+            client = get_groq_client()
+            response = client.chat.completions.create(
                 model=GROQ_MODEL,
                 messages=[
                     {"role": "user", "content": prompt}

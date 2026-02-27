@@ -5,6 +5,14 @@
 # Command: python scheduler.py
 # =====================================================
 
+import sys
+import io
+
+# Force UTF-8 for Windows console
+if sys.platform == "win32":
+    sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8')
+    sys.stderr = io.TextIOWrapper(sys.stderr.buffer, encoding='utf-8')
+
 import schedule
 import time
 import os
