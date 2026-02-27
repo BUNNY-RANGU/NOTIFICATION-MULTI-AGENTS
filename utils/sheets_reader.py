@@ -19,51 +19,45 @@ CACHE_FILE = "data/inventory_cache.json"
 
 
 def connect_to_sheet():
-    try:
-        import requests
-        from requests.adapters import HTTPAdapter
-        from urllib3.util.retry import Retry
+    """
+    Connects to Google Sheets with retry logic.
+    Tries 3 times before giving up.
+    """
+    MAX_RETRIES = 3
 
-        credentials_file = os.getenv("GOOGLE_CREDENTIALS_FILE", "credentials.json")
-        creds = Credentials.from_service_account_file(
-            credentials_file,
-            scopes=SCOPES
-        )
-        
-        # Create a session with timeout and retry
-        session = requests.Session()
-        retry = Retry(total=1, backoff_factor=0.5)
-        adapter = HTTPAdapter(max_retries=retry)
-        session.mount('http://', adapter)
-        session.mount('https://', adapter)
-        
-        # Authorize with timeout settings
-        client = gspread.Client(auth=creds)
-        client.session = None
-        import google.auth.transport.requests
-        creds.refresh(google.auth.transport.requests.Request())
-        client = gspread.authorize(creds)
-        
-        # Set a timeout for the client
-        client.timeout = 10  # 10 seconds timeout
-        
-        sheet_name = os.getenv("GOOGLE_SHEET_NAME", "ShopInventory")
-        spreadsheet = client.open(sheet_name)
-        worksheet = spreadsheet.sheet1
-        print("✅ Google Sheets connected!")
-        return worksheet
+    for attempt in range(1, MAX_RETRIES + 1):
+        try:
+            credentials_file = os.getenv(
+                "GOOGLE_CREDENTIALS_FILE", "credentials.json"
+            )
+            creds = Credentials.from_service_account_file(
+                credentials_file,
+                scopes=SCOPES
+            )
+            client = gspread.authorize(creds)
+            sheet_name = os.getenv("GOOGLE_SHEET_NAME", "ShopInventory")
+            spreadsheet = client.open(sheet_name)
+            worksheet = spreadsheet.sheet1
+            print("✅ Google Sheets connected!")
+            return worksheet
 
-    except FileNotFoundError:
-        print("❌ ERROR: credentials.json not found!")
-        return None
+        except FileNotFoundError:
+            print("❌ credentials.json not found!")
+            return None
 
-    except gspread.exceptions.SpreadsheetNotFound:
-        print("❌ ERROR: Sheet not found! Check name in .env")
-        return None
+        except gspread.exceptions.SpreadsheetNotFound:
+            print("❌ Sheet not found! Check name in .env")
+            return None
 
-    except Exception as e:
-        print(f"❌ ERROR: {e}")
-        return None
+        except Exception as e:
+            print(f"⚠️  Attempt {attempt}/{MAX_RETRIES} failed: {e}")
+            if attempt < MAX_RETRIES:
+                print(f"   Retrying in 5 seconds...")
+                import time
+                time.sleep(5)
+            else:
+                print("❌ All retries failed! Using backup.")
+                return None
 
 
 def read_inventory():

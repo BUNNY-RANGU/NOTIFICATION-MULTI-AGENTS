@@ -10,21 +10,32 @@ GROQ_MODEL = "llama-3.3-70b-versatile"
 
 
 def call_gemini(prompt):
-    # We call it call_gemini but now uses Groq internally
-    # This way we don't need to change anything else!
-    try:
-        response = groq_client.chat.completions.create(
-            model=GROQ_MODEL,
-            messages=[
-                {"role": "user", "content": prompt}
-            ],
-            temperature=0.3,
-            max_tokens=1000
-        )
-        return response.choices[0].message.content
-    except Exception as e:
-        print(f"❌ Groq API Error: {e}")
-        return None
+    """
+    Calls Groq with retry logic.
+    Tries 3 times before using fallback.
+    """
+    MAX_RETRIES = 3
+
+    for attempt in range(1, MAX_RETRIES + 1):
+        try:
+            response = groq_client.chat.completions.create(
+                model=GROQ_MODEL,
+                messages=[
+                    {"role": "user", "content": prompt}
+                ],
+                temperature=0.3,
+                max_tokens=1000
+            )
+            return response.choices[0].message.content
+
+        except Exception as e:
+            print(f"⚠️  AI attempt {attempt}/{MAX_RETRIES}: {e}")
+            if attempt < MAX_RETRIES:
+                import time
+                time.sleep(3)
+            else:
+                print("❌ AI failed! Using fallback.")
+                return None
 
 # =====================================================
 # AGENT 3 — STOCK ANALYST

@@ -30,28 +30,32 @@ GROQ_MODEL = "llama-3.3-70b-versatile"
 
 def call_groq(system_prompt, user_message):
     """
-    Sends a message to Groq AI and gets response back.
-    This is the base function all Groq agents use.
-    
-    system_prompt = tells AI what its JOB is
-    user_message  = the actual data/question
+    Calls Groq with retry logic.
+    Tries 3 times before using fallback.
     """
-    try:
-        client = get_groq_client()
-        response = client.chat.completions.create(
-            model=GROQ_MODEL,
-            messages=[
-                {"role": "system", "content": system_prompt},
-                {"role": "user", "content": user_message}
-            ],
-            temperature=0.3,  # low = more focused, less random
-            max_tokens=1000
-        )
-        return response.choices[0].message.content
+    MAX_RETRIES = 3
 
-    except Exception as e:
-        print(f"❌ Groq API Error: {e}")
-        return None
+    for attempt in range(1, MAX_RETRIES + 1):
+        try:
+            response = client.chat.completions.create(
+                model=GROQ_MODEL,
+                messages=[
+                    {"role": "system", "content": system_prompt},
+                    {"role": "user", "content": user_message}
+                ],
+                temperature=0.3,
+                max_tokens=1000
+            )
+            return response.choices[0].message.content
+
+        except Exception as e:
+            print(f"⚠️  Groq attempt {attempt}/{MAX_RETRIES}: {e}")
+            if attempt < MAX_RETRIES:
+                import time
+                time.sleep(3)
+            else:
+                print("❌ Groq failed! Using fallback response.")
+                return None
 
 
 # =====================================================
