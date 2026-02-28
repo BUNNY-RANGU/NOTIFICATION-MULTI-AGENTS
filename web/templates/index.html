@@ -1,0 +1,511 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🏪 Shop AI Dashboard</title>
+
+    <!-- Tailwind CSS — beautiful styling for free -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Chart.js — beautiful charts -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <!-- Font Awesome — icons -->
+    <link rel="stylesheet" 
+          href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        /* Custom animations */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+        .fade-in { animation: fadeIn 0.5s ease forwards; }
+
+        @keyframes pulse-red {
+            0%, 100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.4); }
+            50%       { box-shadow: 0 0 0 10px rgba(239, 68, 68, 0); }
+        }
+        .pulse-red { animation: pulse-red 2s infinite; }
+
+        /* Scrollbar styling */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: #1e293b; }
+        ::-webkit-scrollbar-thumb { background: #6366f1; border-radius: 3px; }
+
+        /* Status badge colors */
+        .status-expired  { background: #fee2e2; color: #dc2626; }
+        .status-critical { background: #fef3c7; color: #d97706; }
+        .status-safe     { background: #dcfce7; color: #16a34a; }
+        .status-low      { background: #fff7ed; color: #ea580c; }
+        .status-over     { background: #eff6ff; color: #2563eb; }
+        .status-out      { background: #fce7f3; color: #db2777; }
+    </style>
+</head>
+
+<body class="bg-gray-950 text-white min-h-screen">
+
+<!-- ============================================
+     TOP NAVIGATION BAR
+============================================ -->
+<nav class="bg-gray-900 border-b border-gray-800 px-6 py-4 
+            flex items-center justify-between sticky top-0 z-50">
+
+    <div class="flex items-center gap-3">
+        <span class="text-2xl">🏪</span>
+        <div>
+            <h1 class="text-lg font-bold text-white">Shop AI Dashboard</h1>
+            <p class="text-xs text-gray-400">Multi-Agent Inventory System</p>
+        </div>
+    </div>
+
+    <div class="flex items-center gap-4">
+        <!-- Today's date -->
+        <span class="text-gray-400 text-sm">
+            <i class="fas fa-calendar mr-1"></i>
+            {{ today }}
+        </span>
+
+        <!-- Run Report Button -->
+        <button onclick="runReport()"
+                id="run-btn"
+                class="bg-indigo-600 hover:bg-indigo-500 text-white 
+                       px-4 py-2 rounded-lg text-sm font-medium
+                       flex items-center gap-2 transition-all duration-200">
+            <i class="fas fa-play" id="run-icon"></i>
+            <span id="run-text">Run Report Now</span>
+        </button>
+    </div>
+</nav>
+
+<!-- ============================================
+     MAIN CONTENT
+============================================ -->
+<main class="max-w-7xl mx-auto px-6 py-8">
+
+    <!-- ── ALERT BANNER (shows if critical issues) -->
+    {% if stats.critical > 0 %}
+    <div class="bg-red-900 border border-red-700 rounded-xl p-4 mb-6 
+                flex items-center gap-3 pulse-red fade-in">
+        <span class="text-2xl">🚨</span>
+        <div>
+            <p class="font-bold text-red-200">
+                {{ stats.critical }} Critical Issues Detected!
+            </p>
+            <p class="text-red-300 text-sm">
+                ₹{{ stats.money_at_risk }} at risk. Take action immediately!
+            </p>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- ── ROW 1: STATS CARDS -->
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+
+        <!-- Critical Issues -->
+        <div class="bg-gray-900 border border-red-800 rounded-xl p-5 fade-in">
+            <div class="flex items-center justify-between mb-3">
+                <span class="text-red-400 text-sm font-medium">Critical</span>
+                <span class="bg-red-900 text-red-300 p-2 rounded-lg">
+                    <i class="fas fa-exclamation-triangle"></i>
+                </span>
+            </div>
+            <p class="text-4xl font-bold text-red-400">
+                {{ stats.critical }}
+            </p>
+            <p class="text-gray-500 text-xs mt-1">Issues need action NOW</p>
+        </div>
+
+        <!-- High Priority -->
+        <div class="bg-gray-900 border border-orange-800 rounded-xl p-5 fade-in">
+            <div class="flex items-center justify-between mb-3">
+                <span class="text-orange-400 text-sm font-medium">High Priority</span>
+                <span class="bg-orange-900 text-orange-300 p-2 rounded-lg">
+                    <i class="fas fa-arrow-up"></i>
+                </span>
+            </div>
+            <p class="text-4xl font-bold text-orange-400">
+                {{ stats.high }}
+            </p>
+            <p class="text-gray-500 text-xs mt-1">Issues to fix today</p>
+        </div>
+
+        <!-- Total Products -->
+        <div class="bg-gray-900 border border-indigo-800 rounded-xl p-5 fade-in">
+            <div class="flex items-center justify-between mb-3">
+                <span class="text-indigo-400 text-sm font-medium">Products</span>
+                <span class="bg-indigo-900 text-indigo-300 p-2 rounded-lg">
+                    <i class="fas fa-box"></i>
+                </span>
+            </div>
+            <p class="text-4xl font-bold text-indigo-400">
+                {{ stats.products }}
+            </p>
+            <p class="text-gray-500 text-xs mt-1">Total in inventory</p>
+        </div>
+
+        <!-- Money at Risk -->
+        <div class="bg-gray-900 border border-green-800 rounded-xl p-5 fade-in">
+            <div class="flex items-center justify-between mb-3">
+                <span class="text-green-400 text-sm font-medium">Money at Risk</span>
+                <span class="bg-green-900 text-green-300 p-2 rounded-lg">
+                    <i class="fas fa-rupee-sign"></i>
+                </span>
+            </div>
+            <p class="text-4xl font-bold text-green-400">
+                ₹{{ stats.money_at_risk }}
+            </p>
+            <p class="text-gray-500 text-xs mt-1">
+                Save ₹{{ stats.savings }} by acting now
+            </p>
+        </div>
+
+    </div>
+
+    <!-- ── ROW 2: CHARTS -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+
+        <!-- Stock Levels Chart -->
+        <div class="bg-gray-900 border border-gray-800 rounded-xl p-6 fade-in">
+            <h2 class="text-white font-bold mb-4 flex items-center gap-2">
+                <i class="fas fa-chart-bar text-indigo-400"></i>
+                Stock Levels
+            </h2>
+            <canvas id="stockChart" height="200"></canvas>
+        </div>
+
+        <!-- Expiry Timeline Chart -->
+        <div class="bg-gray-900 border border-gray-800 rounded-xl p-6 fade-in">
+            <h2 class="text-white font-bold mb-4 flex items-center gap-2">
+                <i class="fas fa-clock text-orange-400"></i>
+                Days Until Expiry
+            </h2>
+            <canvas id="expiryChart" height="200"></canvas>
+        </div>
+
+    </div>
+
+    <!-- ── ROW 3: INVENTORY TABLE -->
+    <div class="bg-gray-900 border border-gray-800 rounded-xl p-6 mb-8 fade-in">
+        <h2 class="text-white font-bold mb-4 flex items-center gap-2">
+            <i class="fas fa-table text-green-400"></i>
+            Today's Inventory
+        </h2>
+
+        <div class="overflow-x-auto">
+            <table class="w-full text-sm">
+                <thead>
+                    <tr class="text-gray-400 border-b border-gray-800">
+                        <th class="text-left py-3 px-4">Product</th>
+                        <th class="text-left py-3 px-4">Category</th>
+                        <th class="text-left py-3 px-4">Stock</th>
+                        <th class="text-left py-3 px-4">Expiry</th>
+                        <th class="text-left py-3 px-4">Price</th>
+                        <th class="text-left py-3 px-4">Expiry Status</th>
+                        <th class="text-left py-3 px-4">Stock Status</th>
+                    </tr>
+                </thead>
+                <tbody id="inventory-table">
+                    {% for item in inventory %}
+                    <tr class="border-b border-gray-800 hover:bg-gray-800 
+                               transition-colors duration-150">
+
+                        <td class="py-3 px-4 font-medium text-white">
+                            {{ item.product_name }}
+                        </td>
+
+                        <td class="py-3 px-4 text-gray-400">
+                            {{ item.category }}
+                        </td>
+
+                        <td class="py-3 px-4">
+                            <span class="font-bold 
+                                {% if item.stock_qty == 0 %}text-red-400
+                                {% elif item.stock_qty < item.min_stock %}text-orange-400
+                                {% else %}text-green-400{% endif %}">
+                                {{ item.stock_qty }}
+                            </span>
+                            <span class="text-gray-500 text-xs"> / {{ item.min_stock }} min</span>
+                        </td>
+
+                        <td class="py-3 px-4 text-gray-300">
+                            {{ item.expiry_date }}
+                        </td>
+
+                        <td class="py-3 px-4 text-gray-300">
+                            ₹{{ item.price }}
+                        </td>
+
+                        <td class="py-3 px-4">
+                            <span class="px-2 py-1 rounded-full text-xs font-medium
+                                {% if item.expiry_status == 'EXPIRED' %}status-expired
+                                {% elif item.expiry_status == 'EXPIRING_CRITICAL' %}status-critical
+                                {% elif item.expiry_status == 'SAFE' %}status-safe
+                                {% else %}status-critical{% endif %}">
+                                {{ item.expiry_status }}
+                            </span>
+                        </td>
+
+                        <td class="py-3 px-4">
+                            <span class="px-2 py-1 rounded-full text-xs font-medium
+                                {% if item.stock_status == 'OUT_OF_STOCK' %}status-out
+                                {% elif item.stock_status == 'LOW_STOCK' %}status-low
+                                {% elif item.stock_status == 'OVERSTOCKED' %}status-over
+                                {% else %}status-safe{% endif %}">
+                                {{ item.stock_status }}
+                            </span>
+                        </td>
+
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="7" class="py-8 text-center text-gray-500">
+                            No inventory data yet. Click "Run Report Now"!
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- ── ROW 4: AI REPORT + HISTORY -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+
+        <!-- Today's AI Report -->
+        <div class="bg-gray-900 border border-gray-800 rounded-xl p-6 fade-in">
+            <h2 class="text-white font-bold mb-4 flex items-center gap-2">
+                <i class="fas fa-robot text-purple-400"></i>
+                Today's AI Report
+            </h2>
+            <div class="bg-gray-950 rounded-lg p-4 text-sm text-gray-300 
+                        whitespace-pre-line leading-relaxed font-mono
+                        max-h-80 overflow-y-auto">
+                {{ stats.report_text }}
+            </div>
+            <!-- Delivery Status -->
+            <div class="flex gap-3 mt-4">
+                <span class="flex items-center gap-1 text-xs
+                    {% if stats.email_sent %}text-green-400{% else %}text-gray-500{% endif %}">
+                    <i class="fas fa-envelope"></i>
+                    Email {% if stats.email_sent %}Sent ✅{% else %}Not sent{% endif %}
+                </span>
+                <span class="flex items-center gap-1 text-xs
+                    {% if stats.whatsapp_sent %}text-green-400{% else %}text-gray-500{% endif %}">
+                    <i class="fab fa-whatsapp"></i>
+                    WhatsApp {% if stats.whatsapp_sent %}Sent ✅{% else %}Not sent{% endif %}
+                </span>
+            </div>
+        </div>
+
+        <!-- Report History -->
+        <div class="bg-gray-900 border border-gray-800 rounded-xl p-6 fade-in">
+            <h2 class="text-white font-bold mb-4 flex items-center gap-2">
+                <i class="fas fa-history text-blue-400"></i>
+                Report History
+            </h2>
+            <div class="space-y-3 max-h-80 overflow-y-auto">
+                {% for report in recent_reports %}
+                <div class="bg-gray-800 rounded-lg p-3 flex items-center 
+                            justify-between hover:bg-gray-750 transition-colors">
+                    <div>
+                        <p class="text-white text-sm font-medium">
+                            {{ report.report_date }}
+                        </p>
+                        <p class="text-gray-400 text-xs">
+                            🚨 {{ report.critical_count }} critical • 
+                            💰 ₹{{ report.money_at_risk }} at risk
+                        </p>
+                    </div>
+                    <div class="flex gap-2">
+                        <span class="text-xs 
+                            {% if report.email_sent %}text-green-400
+                            {% else %}text-gray-600{% endif %}">
+                            <i class="fas fa-envelope"></i>
+                        </span>
+                        <span class="text-xs 
+                            {% if report.whatsapp_sent %}text-green-400
+                            {% else %}text-gray-600{% endif %}">
+                            <i class="fab fa-whatsapp"></i>
+                        </span>
+                    </div>
+                </div>
+                {% else %}
+                <p class="text-gray-500 text-sm text-center py-8">
+                    No history yet. Run your first report!
+                </p>
+                {% endfor %}
+            </div>
+        </div>
+
+    </div>
+
+</main>
+
+<!-- ============================================
+     SUCCESS/ERROR TOAST NOTIFICATION
+============================================ -->
+<div id="toast"
+     class="fixed bottom-6 right-6 bg-gray-800 text-white px-6 py-4 
+            rounded-xl shadow-2xl border border-gray-700
+            transform translate-y-20 opacity-0 transition-all duration-300
+            flex items-center gap-3 max-w-sm z-50">
+    <span id="toast-icon" class="text-2xl">✅</span>
+    <div>
+        <p id="toast-title" class="font-bold text-sm"></p>
+        <p id="toast-msg" class="text-gray-400 text-xs"></p>
+    </div>
+</div>
+
+<!-- ============================================
+     JAVASCRIPT
+============================================ -->
+<script>
+// ── CHARTS SETUP
+document.addEventListener('DOMContentLoaded', async function() {
+    // Fetch inventory data for charts
+    const res = await fetch('/api/inventory');
+    const items = await res.json();
+
+    if (items.length === 0) return;
+
+    const names   = items.map(i => i.name);
+    const stocks  = items.map(i => i.stock);
+    const expiry  = items.map(i => Math.max(0, i.days_to_expiry));
+
+    // Stock Bar Chart
+    const stockCtx = document.getElementById('stockChart').getContext('2d');
+    new Chart(stockCtx, {
+        type: 'bar',
+        data: {
+            labels: names,
+            datasets: [{
+                label: 'Current Stock',
+                data: stocks,
+                backgroundColor: stocks.map(s =>
+                    s === 0 ? '#ef4444' :
+                    s < 5   ? '#f97316' :
+                              '#6366f1'
+                ),
+                borderRadius: 6,
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: { display: false }
+            },
+            scales: {
+                x: {
+                    ticks: { color: '#9ca3af' },
+                    grid:  { color: '#1f2937' }
+                },
+                y: {
+                    ticks: { color: '#9ca3af' },
+                    grid:  { color: '#1f2937' }
+                }
+            }
+        }
+    });
+
+    // Expiry Doughnut Chart
+    const expiryCtx = document.getElementById('expiryChart').getContext('2d');
+    new Chart(expiryCtx, {
+        type: 'bar',
+        data: {
+            labels: names,
+            datasets: [{
+                label: 'Days to Expiry',
+                data: expiry,
+                backgroundColor: expiry.map(d =>
+                    d === 0   ? '#ef4444' :
+                    d <= 2    ? '#f97316' :
+                    d <= 7    ? '#eab308' :
+                                '#22c55e'
+                ),
+                borderRadius: 6,
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: { display: false }
+            },
+            scales: {
+                x: {
+                    ticks: { color: '#9ca3af' },
+                    grid:  { color: '#1f2937' }
+                },
+                y: {
+                    ticks: { color: '#9ca3af' },
+                    grid:  { color: '#1f2937' }
+                }
+            }
+        }
+    });
+});
+
+
+// ── RUN REPORT BUTTON
+async function runReport() {
+    const btn  = document.getElementById('run-btn');
+    const icon = document.getElementById('run-icon');
+    const text = document.getElementById('run-text');
+
+    // Show loading state
+    btn.disabled = true;
+    btn.classList.add('opacity-75');
+    icon.className = 'fas fa-spinner fa-spin';
+    text.textContent = 'Running...';
+
+    try {
+        const res  = await fetch('/api/run-report', { method: 'POST' });
+        const data = await res.json();
+
+        if (data.success) {
+            showToast('✅', 'Report Generated!',
+                      'Email + WhatsApp sent successfully!');
+            // Reload page after 2 seconds to show new data
+            setTimeout(() => window.location.reload(), 2000);
+        } else {
+            showToast('❌', 'Error!', data.message);
+        }
+
+    } catch (err) {
+        showToast('❌', 'Error!', 'Something went wrong!');
+    } finally {
+        // Reset button
+        btn.disabled = false;
+        btn.classList.remove('opacity-75');
+        icon.className = 'fas fa-play';
+        text.textContent = 'Run Report Now';
+    }
+}
+
+
+// ── TOAST NOTIFICATION
+function showToast(icon, title, message) {
+    const toast = document.getElementById('toast');
+    document.getElementById('toast-icon').textContent  = icon;
+    document.getElementById('toast-title').textContent = title;
+    document.getElementById('toast-msg').textContent   = message;
+
+    // Show toast
+    toast.classList.remove('translate-y-20', 'opacity-0');
+    toast.classList.add('translate-y-0', 'opacity-100');
+
+    // Hide after 4 seconds
+    setTimeout(() => {
+        toast.classList.add('translate-y-20', 'opacity-0');
+        toast.classList.remove('translate-y-0', 'opacity-100');
+    }, 4000);
+}
+
+
+// ── AUTO REFRESH every 5 minutes
+setTimeout(() => window.location.reload(), 5 * 60 * 1000);
+</script>
+
+</body>
+</html>
