@@ -28,18 +28,12 @@ from agents.gemini_agents import (agent_stock_analyst,
 from utils.email_sender import send_email_report
 from utils.whatsapp_sender import send_whatsapp_report
 
-
 def run_daily_report():
-    """
-    Runs the full pipeline.
-    If ANYTHING fails → logs error → keeps running tomorrow.
-    """
-    start_time = datetime.now()
+    """Runs reports for ALL shops at 8AM."""
+    print(f"\n⏰ 8AM TRIGGER — Running all shops...")
 
-    print("\n" + "=" * 55)
-    print(f"⏰ DAILY REPORT STARTING!")
-    print(f"   {start_time.strftime('%d %B %Y — %I:%M %p')}")
-    print("=" * 55)
+    from utils.shop_manager import run_all_shops
+    run_all_shops()
 
     # Track what worked and what failed
     results = {
