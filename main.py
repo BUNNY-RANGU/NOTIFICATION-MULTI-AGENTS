@@ -4,6 +4,8 @@
 
 import sys
 import io
+from utils.telegram_bot import send_telegram_alert_sync
+
 
 # Force UTF-8 for Windows console
 if sys.platform == "win32":
@@ -62,6 +64,10 @@ def main():
     # STEP 6: Send WhatsApp
     print("\n📱 STEP 5: Sending WhatsApp...")
     send_whatsapp_report(final_report, analysis)
+
+    # Add this after WhatsApp:
+    print("\n📲 STEP 6: Sending Telegram...")
+    send_telegram_alert_sync(final_report, analysis)
 
     print("\n" + "=" * 55)
     print("✅ ALL DONE! Email + WhatsApp sent!")
