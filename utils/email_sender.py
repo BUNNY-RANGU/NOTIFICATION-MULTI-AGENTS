@@ -18,7 +18,7 @@ def send_email_report(final_report, analysis):
     Sends beautiful HTML email report using Brevo.
     Completely free. No Gmail passwords needed.
     """
-    print("\n📧 Sending email via Brevo...")
+    print("\nSending email via Brevo...")
 
     # Get settings from .env
     brevo_api_key = os.getenv("BREVO_API_KEY")
@@ -29,11 +29,11 @@ def send_email_report(final_report, analysis):
 
     # Check keys exist
     if not brevo_api_key:
-        print("❌ BREVO_API_KEY missing in .env!")
+        print("BREVO_API_KEY missing in .env!")
         return False
 
     if not owner_email:
-        print("❌ OWNER_EMAIL missing in .env!")
+        print("OWNER_EMAIL missing in .env!")
         return False
 
     today = date.today().strftime("%d %B %Y")
@@ -191,15 +191,15 @@ def send_email_report(final_report, analysis):
     # ── Send it!
     try:
         api_instance.send_transac_email(send_smtp_email)
-        print(f"✅ Email sent to {owner_email}!")
-        print(f"   Check your inbox now! 📬")
+        print(f"Email sent to {owner_email}!")
+        print(f"   Check your inbox now! Pulse")
         return True
 
     except ApiException as e:
-        print(f"❌ Brevo API Error: {e}")
+        print(f"Brevo API Error: {e}")
         print("   Check your BREVO_API_KEY in .env file!")
         return False
 
     except Exception as e:
-        print(f"❌ Email failed: {e}")
+        print(f"Email failed: {e}")
         return False

@@ -1,7 +1,7 @@
-# app.py
+# web/app.py
 # =====================================================
 # JOB: FastAPI application entry point
-# Command to run: uvicorn app:app --reload
+# Command to run: python -m uvicorn web.app:app --reload --host 0.0.0.0 --port 8000
 # Then open: http://localhost:8000
 # =====================================================
 
@@ -9,7 +9,7 @@ from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
 from web.database import init_db
-from web.routes import router, save_report_to_db, save_inventory_to_db
+from web.routes import router
 
 # Create FastAPI app
 app = FastAPI(
@@ -43,4 +43,5 @@ async def startup_event():
 
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run("app:app", host="0.0.0.0", port=8000, reload=True)
+    # Use 'web.app:app' because we are inside the 'web' package
+    uvicorn.run("web.app:app", host="0.0.0.0", port=8000, reload=True)

@@ -24,7 +24,7 @@ def add_shop(shop_name, owner_name, owner_email,
         ).first()
 
         if existing:
-            print(f"⚠️  Shop already exists: {owner_email}")
+            print(f"Shop already exists: {owner_email}")
             return existing
 
         # Create new shop
@@ -43,11 +43,11 @@ def add_shop(shop_name, owner_name, owner_email,
         db.commit()
         db.refresh(new_shop)
 
-        print(f"✅ Shop added: {shop_name} (ID: {new_shop.id})")
+        print(f"Shop added: {shop_name} (ID: {new_shop.id})")
         return new_shop
 
     except Exception as e:
-        print(f"❌ Error adding shop: {e}")
+        print(f"Error adding shop: {e}")
         db.rollback()
         return None
     finally:
@@ -72,19 +72,19 @@ def run_report_for_shop(shop):
     Reads THEIR sheet, sends to THEIR phone/email.
     """
     print(f"\n{'='*55}")
-    print(f"🏪 Running report for: {shop.shop_name}")
+    print(f"Shop: {shop.shop_name}")
     print(f"   Owner: {shop.owner_name}")
     print(f"   Email: {shop.owner_email}")
     print(f"{'='*55}")
 
     try:
-        # ── Override env variables for this shop
+        # Override env variables for this shop
         os.environ["GOOGLE_SHEET_NAME"] = shop.sheet_name
         os.environ["OWNER_EMAIL"]       = shop.owner_email
         os.environ["OWNER_NAME"]        = shop.owner_name
         os.environ["OWNER_WHATSAPP"]    = f"whatsapp:{shop.whatsapp_number}"
 
-        # ── Run the pipeline
+        # Run the pipeline
         from utils.sheets_reader import read_inventory
         from utils.analyzer import analyze_inventory
         from agents.groq_agents import (agent_data_reader,
@@ -97,7 +97,7 @@ def run_report_for_shop(shop):
 
         inventory = read_inventory()
         if not inventory:
-            print(f"❌ No inventory for {shop.shop_name}")
+            print(f"Error: No inventory for {shop.shop_name}")
             return False
 
         analysis = analyze_inventory(inventory)
@@ -122,11 +122,11 @@ def run_report_for_shop(shop):
                          final_report, email_sent, wa_sent)
         save_shop_inventory(shop.id, inventory, analysis)
 
-        print(f"✅ Done for {shop.shop_name}!")
+        print(f"Done for {shop.shop_name}!")
         return True
 
     except Exception as e:
-        print(f"❌ Error for {shop.shop_name}: {e}")
+        print(f"Error for {shop.shop_name}: {e}")
         return False
 
 
@@ -135,15 +135,15 @@ def run_all_shops():
     Runs reports for ALL active shops.
     Call this from scheduler every morning!
     """
-    print("\n🚀 RUNNING REPORTS FOR ALL SHOPS...")
+    print("\nRUNNING REPORTS FOR ALL SHOPS...")
     shops = get_all_active_shops()
 
     if not shops:
-        print("⚠️  No active shops found!")
+        print("Warning: No active shops found!")
         print("   Add shops using add_shop() function")
         return
 
-    print(f"📊 Found {len(shops)} active shops")
+    print(f"Found {len(shops)} active shops")
 
     results = []
     for shop in shops:
@@ -155,11 +155,11 @@ def run_all_shops():
 
     # Print summary
     print(f"\n{'='*55}")
-    print("📊 ALL SHOPS SUMMARY")
+    print("ALL SHOPS SUMMARY")
     print(f"{'='*55}")
     for r in results:
-        status = "✅" if r["success"] else "❌"
-        print(f"   {status} {r['shop']}")
+        status = "Success" if r["success"] else "Failed"
+        print(f"   {status}: {r['shop']}")
     print(f"{'='*55}")
 
 
@@ -202,10 +202,10 @@ def save_shop_report(shop_id, analysis, report_text,
             db.add(report)
 
         db.commit()
-        print(f"💾 Report saved for shop {shop_id}!")
+        print(f"Report saved for shop {shop_id}!")
 
     except Exception as e:
-        print(f"❌ Error saving report: {e}")
+        print(f"Error saving report: {e}")
         db.rollback()
     finally:
         db.close()
@@ -247,10 +247,10 @@ def save_shop_inventory(shop_id, inventory, analysis):
             db.add(snapshot)
 
         db.commit()
-        print(f"💾 Inventory saved for shop {shop_id}!")
+        print(f"Inventory saved for shop {shop_id}!")
 
     except Exception as e:
-        print(f"❌ Error saving inventory: {e}")
+        print(f"Error saving inventory: {e}")
         db.rollback()
     finally:
         db.close()

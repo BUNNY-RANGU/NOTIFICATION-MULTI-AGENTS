@@ -16,7 +16,7 @@ def send_whatsapp_report(final_report, analysis):
     Sends the AI report via WhatsApp.
     Keeps it under 300 words for WhatsApp.
     """
-    print("\n📱 Sending WhatsApp message...")
+    print("\nSending WhatsApp message...")
 
     # Get credentials from .env
     account_sid = os.getenv("TWILIO_ACCOUNT_SID")
@@ -24,14 +24,22 @@ def send_whatsapp_report(final_report, analysis):
     from_number = os.getenv("TWILIO_WHATSAPP_FROM")
     to_number   = os.getenv("OWNER_WHATSAPP")
 
-    # Check all credentials exist
     if not account_sid or not auth_token:
-        print("❌ Twilio credentials missing in .env!")
+        print("Twilio credentials missing in .env!")
         return False
 
     if not to_number:
-        print("❌ OWNER_WHATSAPP missing in .env!")
+        print("OWNER_WHATSAPP missing in .env!")
         return False
+    
+    # Ensure number format is correct for Twilio
+    if not to_number.startswith("whatsapp:"):
+        to_number = f"whatsapp:{to_number}"
+
+    print(f"Target Phone: {to_number}")
+    print(f"From Number:  {from_number}")
+    print(f"TIP: Make sure your phone has JOINED the Twilio sandbox!")
+    print(f"   Send 'join {from_number.replace('whatsapp:', '')}' to that number.")
 
     try:
         # Connect to Twilio
@@ -48,11 +56,11 @@ def send_whatsapp_report(final_report, analysis):
             body=short_report
         )
 
-        print(f"✅ WhatsApp sent! Message ID: {message.sid}")
+        print(f"WhatsApp sent! Message ID: {message.sid}")
         return True
 
     except Exception as e:
-        print(f"❌ WhatsApp failed: {e}")
+        print(f"WhatsApp failed: {e}")
         print("   Check your Twilio credentials in .env")
         return False
 

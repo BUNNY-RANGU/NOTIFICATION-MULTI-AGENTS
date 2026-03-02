@@ -50,6 +50,6 @@ def init_db():
     Creates all database tables.
     Run this once when app starts.
     """
-    from web.models import DailyReport, InventorySnapshot
+    from web.models import Shop, DailyReport, InventorySnapshot
     Base.metadata.create_all(bind=engine)
-    print("✅ Database initialized!")
+    print("Database initialized!")

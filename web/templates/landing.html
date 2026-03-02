@@ -1,0 +1,548 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🏪 Shop AI Agent — Never Lose Money Again!</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+    <style>
+        @keyframes float {
+
+            0%,
+            100% {
+                transform: translateY(0px);
+            }
+
+            50% {
+                transform: translateY(-10px);
+            }
+        }
+
+        .float {
+            animation: float 3s ease-in-out infinite;
+        }
+
+        @keyframes fadeUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .fade-up {
+            animation: fadeUp 0.6s ease forwards;
+        }
+    </style>
+</head>
+
+<body class="bg-gray-950 text-white">
+
+    <!-- ── HERO SECTION -->
+    <section class="min-h-screen flex flex-col items-center 
+                justify-center text-center px-6 py-20">
+
+        <div class="float text-8xl mb-6">🏪</div>
+
+        <h1 class="text-5xl md:text-6xl font-black mb-6 fade-up
+               bg-gradient-to-r from-indigo-400 to-purple-400 
+               bg-clip-text text-transparent">
+            Shop AI Agent
+        </h1>
+
+        <p class="text-xl text-gray-300 mb-4 max-w-2xl fade-up">
+            Never lose money from expired stock or empty shelves again.
+            AI monitors your inventory 24/7 and sends alerts to your
+            WhatsApp every morning.
+        </p>
+
+        <p class="text-gray-500 mb-10 fade-up">
+            Used by smart shop owners across India 🇮🇳
+        </p>
+
+        <!-- CTA Buttons -->
+        <div class="flex gap-4 flex-wrap justify-center fade-up">
+            <a href="/dashboard" class="bg-indigo-600 hover:bg-indigo-500 text-white
+                  px-8 py-4 rounded-xl font-bold text-lg
+                  transition-all duration-200 hover:scale-105">
+                View Demo Dashboard →
+            </a>
+            <button onclick="scrollToPrice()" class="bg-green-600 hover:bg-green-500 text-white
+                       px-8 py-4 rounded-xl font-bold text-lg
+                       transition-all duration-200 hover:scale-105">
+                Start Free Trial 🚀
+            </button>
+        </div>
+
+    </section>
+
+    <!-- ── HOW IT WORKS -->
+    <section class="py-20 px-6 bg-gray-900">
+        <div class="max-w-5xl mx-auto">
+            <h2 class="text-3xl font-black text-center mb-12">
+                How It Works 🤖
+            </h2>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+
+                <div class="bg-gray-800 rounded-2xl p-6 text-center">
+                    <div class="text-5xl mb-4">📊</div>
+                    <h3 class="font-bold text-lg mb-2">1. Connect Your Sheet</h3>
+                    <p class="text-gray-400">
+                        Just share your Google Sheet with us.
+                        Add your products once. Done!
+                    </p>
+                </div>
+
+                <div class="bg-gray-800 rounded-2xl p-6 text-center">
+                    <div class="text-5xl mb-4">🤖</div>
+                    <h3 class="font-bold text-lg mb-2">2. AI Monitors 24/7</h3>
+                    <p class="text-gray-400">
+                        5 AI agents check expiry dates,
+                        stock levels, and find problems
+                        before they cost you money.
+                    </p>
+                </div>
+
+                <div class="bg-gray-800 rounded-2xl p-6 text-center">
+                    <div class="text-5xl mb-4">📱</div>
+                    <h3 class="font-bold text-lg mb-2">3. Get WhatsApp Alert</h3>
+                    <p class="text-gray-400">
+                        Every morning at 8AM, get a clear
+                        report on your WhatsApp with
+                        exact actions to take!
+                    </p>
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+    <!-- ── FEATURES -->
+    <section class="py-20 px-6">
+        <div class="max-w-5xl mx-auto">
+            <h2 class="text-3xl font-black text-center mb-12">
+                What You Get 💎
+            </h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+
+                {% set features = [
+                ("📧", "Daily Email Report",
+                "Beautiful HTML report with charts every morning"),
+                ("📱", "WhatsApp Alert",
+                "Short action-focused message on WhatsApp at 8AM"),
+                ("🤖", "Telegram Bot",
+                "Ask questions anytime — AI answers instantly"),
+                ("📊", "Live Dashboard",
+                "See all inventory data in real-time on website"),
+                ("🔴", "Expiry Detection",
+                "5-tier system catches items before they expire"),
+                ("📦", "Stock Alerts",
+                "Never run out of stock or overstock again"),
+                ("💰", "Savings Calculator",
+                "See exactly how much money you save each day"),
+                ("🛡️", "Never Crashes",
+                "Bulletproof system with automatic fallbacks")
+                ] %}
+
+                {% for icon, title, desc in features %}
+                <div class="flex gap-4 bg-gray-900 rounded-xl p-5
+                        border border-gray-800 hover:border-indigo-600
+                        transition-all duration-200">
+                    <span class="text-3xl">{{ icon }}</span>
+                    <div>
+                        <h3 class="font-bold mb-1">{{ title }}</h3>
+                        <p class="text-gray-400 text-sm">{{ desc }}</p>
+                    </div>
+                </div>
+                {% endfor %}
+
+            </div>
+        </div>
+    </section>
+
+    <!-- ── PRICING -->
+    <section id="pricing" class="py-20 px-6 bg-gray-900">
+        <div class="max-w-4xl mx-auto text-center">
+            <h2 class="text-3xl font-black mb-4">
+                Simple Pricing 💰
+            </h2>
+            <p class="text-gray-400 mb-12">
+                Start free. Upgrade when you see results.
+            </p>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+
+                <!-- Free Plan -->
+                <div class="bg-gray-800 rounded-2xl p-8 border border-gray-700">
+                    <h3 class="text-xl font-black mb-2">Free Trial</h3>
+                    <p class="text-5xl font-black text-white mb-6">
+                        ₹0
+                        <span class="text-lg text-gray-400">/7 days</span>
+                    </p>
+                    <ul class="text-left space-y-3 mb-8">
+                        {% for feature in [
+                        "1 shop",
+                        "Daily WhatsApp report",
+                        "Email alerts",
+                        "Basic dashboard",
+                        "Up to 20 products"
+                        ] %}
+                        <li class="flex gap-2 text-gray-300">
+                            <span class="text-green-400">✅</span>
+                            {{ feature }}
+                        </li>
+                        {% endfor %}
+                    </ul>
+                    <button onclick="startFreeTrial()" class="w-full bg-gray-700 hover:bg-gray-600
+                               text-white py-3 rounded-xl font-bold
+                               transition-all duration-200">
+                        Start Free Trial
+                    </button>
+                </div>
+
+                <!-- Paid Plan -->
+                <div class="bg-gradient-to-b from-indigo-900 to-purple-900
+                        rounded-2xl p-8 border-2 border-indigo-500
+                        relative">
+                    <div class="absolute -top-4 left-1/2 -translate-x-1/2
+                            bg-indigo-500 text-white text-xs font-bold
+                            px-4 py-1 rounded-full">
+                        MOST POPULAR ⭐
+                    </div>
+                    <h3 class="text-xl font-black mb-2">Pro Plan</h3>
+                    <p class="text-5xl font-black text-indigo-300 mb-6">
+                        ₹499
+                        <span class="text-lg text-gray-400">/month</span>
+                    </p>
+                    <ul class="text-left space-y-3 mb-8">
+                        {% for feature in [
+                        "Unlimited products",
+                        "WhatsApp + Email + Telegram",
+                        "Advanced AI analysis",
+                        "Full dashboard with charts",
+                        "Report history (30 days)",
+                        "Priority support",
+                        "Multiple staff alerts"
+                        ] %}
+                        <li class="flex gap-2 text-gray-300">
+                            <span class="text-green-400">✅</span>
+                            {{ feature }}
+                        </li>
+                        {% endfor %}
+                    </ul>
+                    <button onclick="startPayment()" id="pay-btn" class="w-full bg-indigo-600 hover:bg-indigo-500
+                               text-white py-3 rounded-xl font-bold
+                               transition-all duration-200 hover:scale-105">
+                        Subscribe Now — ₹499/month
+
+                    </button>
+                    <!-- Add this INSIDE the Pro Plan card -->
+                    <!-- After the Subscribe button -->
+
+                    <div class="mt-6 pt-6 border-t border-indigo-700">
+                        <p class="text-center text-gray-300 text-sm font-bold mb-3">
+                            🇮🇳 Pay directly via UPI
+                        </p>
+
+                        <!-- UPI QR Code -->
+                        <div class="flex flex-col items-center gap-4">
+                            <!-- QR Codes -->
+                            <div class="flex gap-4">
+                                <div class="text-center">
+                                    <img src="/static/google_pay.jpeg" alt="GPay QR" class="w-32 h-32 rounded-xl border-2 
+                                        border-indigo-400 p-2 bg-white object-contain">
+                                    <p class="text-[10px] text-gray-400 mt-1">Google Pay</p>
+                                </div>
+                                <div class="text-center">
+                                    <img src="/static/phone_pay.jpeg" alt="PhonePe QR" class="w-32 h-32 rounded-xl border-2 
+                                        border-indigo-400 p-2 bg-white object-contain">
+                                    <p class="text-[10px] text-gray-400 mt-1">PhonePe</p>
+                                </div>
+                            </div>
+
+                            <div class="text-center">
+                                <p class="text-indigo-300 font-bold text-sm">
+                                    Scan with any UPI app
+                                </p>
+                                <p class="text-gray-400 text-xs mt-1">
+                                    PhonePe • GPay • Paytm • BHIM
+                                </p>
+                            </div>
+
+                            <!-- UPI ID to copy -->
+                            <div class="bg-gray-800 rounded-lg px-4 py-2 
+                    flex items-center gap-2 w-full">
+                                <span class="text-gray-400 text-xs">UPI ID:</span>
+                                <span class="text-white text-xs font-mono flex-1" id="upi-id">
+                                    9985784511@ybl
+                                </span>
+                                <button onclick="copyUPI()" class="text-indigo-400 hover:text-indigo-300
+                           text-xs font-bold transition-colors">
+                                    COPY
+                                </button>
+                            </div>
+
+                            <p class="text-gray-500 text-xs text-center">
+                                After payment, WhatsApp your receipt to<br>
+                                <span class="text-indigo-400">+919985784511</span>
+                                for instant activation!
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+    <!-- ── FOOTER -->
+    <footer class="py-10 text-center text-gray-500 text-sm">
+        <p class="text-2xl mb-2">🏪</p>
+        <p>Shop AI Agent — Built for Indian shop owners</p>
+        <p class="mt-2">
+            Made with ❤️ by
+            <a href="https://github.com/BUNNY-RANGU" class="text-indigo-400 hover:underline">
+                Rangu Suchandra
+            </a>
+        </p>
+    </footer>
+
+    <!-- ── SIGNUP MODAL -->
+    <div id="signup-modal" class="fixed inset-0 bg-black bg-opacity-80 z-50
+            flex items-center justify-center hidden">
+        <div class="bg-gray-900 rounded-2xl p-8 max-w-md w-full mx-4
+                border border-gray-700">
+            <h2 class="text-2xl font-black mb-6">
+                🚀 Get Started
+            </h2>
+
+            <div class="space-y-4" id="signup-form">
+
+                <input type="text" id="shop-name" placeholder="Shop Name (e.g. Rangu General Store)" class="w-full bg-gray-800 border border-gray-700
+                          rounded-xl px-4 py-3 text-white
+                          focus:outline-none focus:border-indigo-500">
+
+                <input type="text" id="owner-name" placeholder="Your Name" class="w-full bg-gray-800 border border-gray-700
+                          rounded-xl px-4 py-3 text-white
+                          focus:outline-none focus:border-indigo-500">
+
+                <input type="email" id="owner-email" placeholder="Your Email" class="w-full bg-gray-800 border border-gray-700
+                          rounded-xl px-4 py-3 text-white
+                          focus:outline-none focus:border-indigo-500">
+
+                <input type="tel" id="owner-phone" placeholder="WhatsApp Number (+91XXXXXXXXXX)" class="w-full bg-gray-800 border border-gray-700
+                          rounded-xl px-4 py-3 text-white
+                          focus:outline-none focus:border-indigo-500">
+
+                <input type="text" id="sheet-name" placeholder="Google Sheet Name (e.g. ShopInventory)" class="w-full bg-gray-800 border border-gray-700
+                          rounded-xl px-4 py-3 text-white
+                          focus:outline-none focus:border-indigo-500">
+
+                <button onclick="submitSignup()" id="submit-btn" class="w-full bg-indigo-600 hover:bg-indigo-500
+                           text-white py-3 rounded-xl font-bold
+                           transition-all duration-200">
+                    Continue to Payment →
+                </button>
+
+                <button onclick="closeModal()" class="w-full text-gray-500 hover:text-white
+                           py-2 transition-colors">
+                    Cancel
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ── JAVASCRIPT -->
+    <script>
+        // Scroll to pricing
+        function scrollToPrice() {
+            document.getElementById('pricing')
+                .scrollIntoView({ behavior: 'smooth' });
+        }
+
+        // Copy UPI ID to clipboard
+        function copyUPI() {
+            const upiId = document.getElementById('upi-id').textContent.trim();
+            navigator.clipboard.writeText(upiId);
+
+            // Show copied feedback
+            const btn = event.target;
+            const originalText = btn.textContent;
+            btn.textContent = 'COPIED! ✅';
+            btn.classList.add('text-green-400');
+
+            setTimeout(() => {
+                btn.textContent = originalText;
+                btn.classList.remove('text-green-400');
+            }, 2000);
+        }
+
+        // Open signup modal for free trial
+        function startFreeTrial() {
+            document.getElementById('signup-modal')
+                .classList.remove('hidden');
+        }
+
+        // Open signup modal for paid plan
+        function startPayment() {
+            document.getElementById('signup-modal')
+                .classList.remove('hidden');
+        }
+
+        // Close modal
+        function closeModal() {
+            document.getElementById('signup-modal')
+                .classList.add('hidden');
+        }
+
+        // Store owner data globally
+        let ownerData = {};
+
+        // Submit signup form
+        async function submitSignup() {
+            const btn = document.getElementById('submit-btn');
+
+            // Collect form data
+            ownerData = {
+                shop_name: document.getElementById('shop-name').value,
+                owner_name: document.getElementById('owner-name').value,
+                owner_email: document.getElementById('owner-email').value,
+                owner_phone: document.getElementById('owner-phone').value,
+                sheet_name: document.getElementById('sheet-name').value
+            };
+
+            // Validate
+            if (!ownerData.shop_name || !ownerData.owner_email ||
+                !ownerData.owner_phone) {
+                alert('Please fill all required fields!');
+                return;
+            }
+
+            btn.textContent = 'Processing...';
+            btn.disabled = true;
+
+            try {
+                // Register shop first
+                const regRes = await fetch('/api/register-shop', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(ownerData)
+                });
+                const regData = await regRes.json();
+
+                if (!regData.success) {
+                    alert('Error: ' + regData.message);
+                    btn.textContent = 'Continue to Payment →';
+                    btn.disabled = false;
+                    return;
+                }
+
+                // Create payment order
+                const orderRes = await fetch('/api/create-order', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        email: ownerData.owner_email,
+                        shop_name: ownerData.shop_name
+                    })
+                });
+                const orderData = await orderRes.json();
+
+                if (!orderData.success) {
+                    alert('Payment error: ' + orderData.error);
+                    return;
+                }
+
+                closeModal();
+
+                // Open Razorpay payment popup
+                openRazorpay(orderData);
+
+            } catch (err) {
+                alert('Error: ' + err.message);
+            } finally {
+                btn.textContent = 'Continue to Payment →';
+                btn.disabled = false;
+            }
+        }
+
+        // Open Razorpay payment popup
+        function openRazorpay(orderData) {
+            const options = {
+                key: orderData.key_id,
+                amount: orderData.amount,
+                currency: "INR",
+                name: "Shop AI Agent",
+                description: "Monthly Subscription — ₹499/month",
+                image: "https://via.placeholder.com/150x150?text=🏪",
+                order_id: orderData.order_id,
+                prefill: {
+                    name: ownerData.owner_name,
+                    email: ownerData.owner_email,
+                    contact: ownerData.owner_phone
+                },
+                theme: { color: "#6366f1" },
+
+                handler: async function (response) {
+                    // Payment successful!
+                    // Verify payment on backend
+                    const verifyRes = await fetch('/api/verify-payment', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            order_id: orderData.order_id,
+                            payment_id: response.razorpay_payment_id,
+                            signature: response.razorpay_signature,
+                            email: ownerData.owner_email
+                        })
+                    });
+
+                    const verifyData = await verifyRes.json();
+
+                    if (verifyData.success) {
+                        // Show success!
+                        document.body.innerHTML = `
+                <div style="min-height:100vh;display:flex;
+                            flex-direction:column;align-items:center;
+                            justify-content:center;background:#030712;
+                            color:white;text-align:center;padding:20px;">
+                    <div style="font-size:80px;margin-bottom:20px">🎉</div>
+                    <h1 style="font-size:36px;font-weight:900;
+                               margin-bottom:10px">
+                        Welcome to Shop AI Agent!
+                    </h1>
+                    <p style="color:#9ca3af;margin-bottom:30px">
+                        Payment successful! Your shop is being set up.
+                        You'll receive your first report tomorrow at 8AM!
+                    </p>
+                    <p style="color:#6366f1;font-size:18px">
+                        Payment ID: ${response.razorpay_payment_id}
+                    </p>
+                    <a href="/dashboard"
+                       style="margin-top:30px;background:#6366f1;
+                              color:white;padding:12px 30px;
+                              border-radius:12px;font-weight:bold;
+                              text-decoration:none">
+                        Go to Dashboard →
+                    </a>
+                </div>`;
+                    } else {
+                        alert('Payment verification failed!');
+                    }
+                }
+            };
+
+            const rzp = new Razorpay(options);
+            rzp.open();
+        }
+    </script>
+
+</body>
+
+</html>

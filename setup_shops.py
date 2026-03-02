@@ -9,7 +9,7 @@ from utils.shop_manager import add_shop, get_all_active_shops
 
 def setup():
     print("=" * 55)
-    print("🏪 SHOP AI AGENT — ADDING SHOPS")
+    print("SHOP AI AGENT -- ADDING SHOPS")
     print("=" * 55)
 
     # Initialize database first
@@ -43,17 +43,17 @@ def setup():
 
     # ── SHOW ALL SHOPS
     shops = get_all_active_shops()
-    print(f"\n📊 ACTIVE SHOPS IN SYSTEM: {len(shops)}")
+    print(f"\nACTIVE SHOPS IN SYSTEM: {len(shops)}")
     print("-" * 40)
     for shop in shops:
-        print(f"✅ {shop.shop_name}")
+        print(f"Shop: {shop.shop_name}")
         print(f"   Owner : {shop.owner_name}")
         print(f"   Email : {shop.owner_email}")
         print(f"   Sheet : {shop.sheet_name}")
         print()
 
     print("=" * 55)
-    print("✅ Setup complete!")
+    print("Setup complete!")
     print("   Run: python run_all_shops.py")
     print("=" * 55)
 

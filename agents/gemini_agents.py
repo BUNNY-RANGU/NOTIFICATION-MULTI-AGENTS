@@ -41,12 +41,12 @@ def call_gemini(prompt):
             return response.choices[0].message.content
 
         except Exception as e:
-            print(f"⚠️  AI attempt {attempt}/{MAX_RETRIES}: {e}")
+            print(f"AI attempt {attempt}/{MAX_RETRIES}: {e}")
             if attempt < MAX_RETRIES:
                 import time
                 time.sleep(3)
             else:
-                print("❌ AI failed! Using fallback.")
+                print("AI failed! Using fallback.")
                 return None
 
 # =====================================================
@@ -59,10 +59,10 @@ def agent_stock_analyst(stock_issues, inventory):
     Agent 3: Analyzes stock problems.
     Identifies what's missing, what's excess.
     """
-    print("\n🤖 Agent 3 (Gemini) → Analyzing stock...")
+    print("\nAgent 3 (Gemini) -> Analyzing stock...")
 
     if not stock_issues:
-        print("✅ Agent 3 done! No stock issues.")
+        print("Agent 3 done! No stock issues.")
         return "All stock levels are healthy. No reorders needed today."
 
     # Build stock issues text
@@ -94,7 +94,7 @@ No long paragraphs. Use simple language."""
     result = call_gemini(prompt)
 
     if result:
-        print("✅ Agent 3 done!")
+        print("Agent 3 done!")
         return result
     else:
         return "Check stock levels and reorder critical items immediately."
@@ -110,7 +110,7 @@ def agent_recommender(analysis, inventory):
     Agent 4: The strategic brain.
     Generates 5 specific actions the owner must take today.
     """
-    print("\n🤖 Agent 4 (Gemini) → Generating recommendations...")
+    print("\nAgent 4 (Gemini) -> Generating recommendations...")
 
     # Build full context for AI
     expiry_count = len(analysis["expiry_issues"])
@@ -148,7 +148,7 @@ Format:
     result = call_gemini(prompt)
 
     if result:
-        print("✅ Agent 4 done!")
+        print("Agent 4 done!")
         return result
     else:
         return """1. [MORNING] Apply 50% discount on expired items → Clear stock fast
@@ -170,7 +170,7 @@ def agent_report_writer(data_summary, expiry_analysis,
     Takes all agent outputs and writes ONE clean report.
     Under 300 words. WhatsApp friendly. Emoji rich.
     """
-    print("\n🤖 Agent 5 (Gemini) → Writing final report...")
+    print("\nAgent 5 (Gemini) -> Writing final report...")
 
     from datetime import date
     today = date.today().strftime("%d %B %Y")
@@ -225,7 +225,7 @@ Indian context. Warm but urgent tone."""
     result = call_gemini(prompt)
 
     if result:
-        print("✅ Agent 5 done!")
+        print("Agent 5 done!")
         return result
     else:
         return f"""📊 DAILY SHOP REPORT — {today}

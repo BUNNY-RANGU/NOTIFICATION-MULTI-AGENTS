@@ -1,511 +1,557 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🏪 Shop AI Dashboard</title>
+    <title>🏪 Shop AI Dashboard | Premium Experience</title>
 
-    <!-- Tailwind CSS — beautiful styling for free -->
+    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
 
-    <!-- Chart.js — beautiful charts -->
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&family=Inter:wght@400;500;600&display=swap"
+        rel="stylesheet">
+
+    <!-- Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
-    <!-- Font Awesome — icons -->
-    <link rel="stylesheet" 
-          href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- Custom Premium Styles -->
+    <link rel="stylesheet" href="/static/style.css">
 
     <style>
-        /* Custom animations */
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(20px); }
-            to   { opacity: 1; transform: translateY(0); }
+        /* Specific status colors for the dashboard */
+        .status-expired {
+            background: rgba(239, 68, 68, 0.2);
+            color: #f87171;
+            border: 1px solid rgba(239, 68, 68, 0.3);
         }
-        .fade-in { animation: fadeIn 0.5s ease forwards; }
 
-        @keyframes pulse-red {
-            0%, 100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.4); }
-            50%       { box-shadow: 0 0 0 10px rgba(239, 68, 68, 0); }
+        .status-critical {
+            background: rgba(245, 158, 11, 0.2);
+            color: #fbbf24;
+            border: 1px solid rgba(245, 158, 11, 0.3);
         }
-        .pulse-red { animation: pulse-red 2s infinite; }
 
-        /* Scrollbar styling */
-        ::-webkit-scrollbar { width: 6px; }
-        ::-webkit-scrollbar-track { background: #1e293b; }
-        ::-webkit-scrollbar-thumb { background: #6366f1; border-radius: 3px; }
+        .status-safe {
+            background: rgba(16, 185, 129, 0.2);
+            color: #34d399;
+            border: 1px solid rgba(16, 185, 129, 0.3);
+        }
 
-        /* Status badge colors */
-        .status-expired  { background: #fee2e2; color: #dc2626; }
-        .status-critical { background: #fef3c7; color: #d97706; }
-        .status-safe     { background: #dcfce7; color: #16a34a; }
-        .status-low      { background: #fff7ed; color: #ea580c; }
-        .status-over     { background: #eff6ff; color: #2563eb; }
-        .status-out      { background: #fce7f3; color: #db2777; }
+        .status-low {
+            background: rgba(249, 115, 22, 0.2);
+            color: #fb923c;
+            border: 1px solid rgba(249, 115, 22, 0.3);
+        }
+
+        .status-over {
+            background: rgba(59, 130, 246, 0.2);
+            color: #60a5fa;
+            border: 1px solid rgba(59, 130, 246, 0.3);
+        }
+
+        .status-out {
+            background: rgba(236, 72, 153, 0.2);
+            color: #f472b6;
+            border: 1px solid rgba(236, 72, 153, 0.3);
+        }
+
+        .sidebar-active {
+            background: rgba(99, 102, 241, 0.1);
+            border-right: 2px solid var(--primary);
+        }
     </style>
 </head>
 
-<body class="bg-gray-950 text-white min-h-screen">
+<body class="bg-gray-950 text-white min-h-screen flex">
 
-<!-- ============================================
-     TOP NAVIGATION BAR
+    <!-- ============================================
+     SIDEBAR NAVIGATION
 ============================================ -->
-<nav class="bg-gray-900 border-b border-gray-800 px-6 py-4 
-            flex items-center justify-between sticky top-0 z-50">
-
-    <div class="flex items-center gap-3">
-        <span class="text-2xl">🏪</span>
-        <div>
-            <h1 class="text-lg font-bold text-white">Shop AI Dashboard</h1>
-            <p class="text-xs text-gray-400">Multi-Agent Inventory System</p>
+    <aside
+        class="w-64 bg-gray-900/50 backdrop-blur-xl border-r border-gray-800 h-screen sticky top-0 z-50 flex-col hidden md:flex">
+        <div class="p-8 flex items-center gap-3">
+            <div
+                class="w-10 h-10 bg-gradient-primary rounded-xl flex items-center justify-center shadow-lg shadow-indigo-500/20">
+                <span class="text-xl">🏪</span>
+            </div>
+            <div>
+                <h1 class="text-lg font-bold tracking-tight text-gradient">Shop AI</h1>
+                <p class="text-[10px] uppercase tracking-widest text-gray-500 font-bold">Premium Dashboard</p>
+            </div>
         </div>
-    </div>
 
-    <div class="flex items-center gap-4">
-        <!-- Today's date -->
-        <span class="text-gray-400 text-sm">
-            <i class="fas fa-calendar mr-1"></i>
-            {{ today }}
-        </span>
+        <nav class="flex-1 px-4 py-4 space-y-2">
+            <a href="#"
+                class="flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 text-white sidebar-active">
+                <i class="fas fa-th-large text-indigo-400"></i>
+                <span class="font-medium">Overview</span>
+            </a>
+            <a href="#"
+                class="flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 text-gray-400 hover:bg-white/5 hover:text-white">
+                <i class="fas fa-box"></i>
+                <span class="font-medium">Inventory</span>
+            </a>
+            <a href="#"
+                class="flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 text-gray-400 hover:bg-white/5 hover:text-white">
+                <i class="fas fa-chart-line"></i>
+                <span class="font-medium">Analytics</span>
+            </a>
+            <a href="#"
+                class="flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 text-gray-400 hover:bg-white/5 hover:text-white">
+                <i class="fas fa-cog"></i>
+                <span class="font-medium">Settings</span>
+            </a>
+        </nav>
 
-        <!-- Run Report Button -->
-        <button onclick="runReport()"
-                id="run-btn"
-                class="bg-indigo-600 hover:bg-indigo-500 text-white 
-                       px-4 py-2 rounded-lg text-sm font-medium
-                       flex items-center gap-2 transition-all duration-200">
-            <i class="fas fa-play" id="run-icon"></i>
-            <span id="run-text">Run Report Now</span>
-        </button>
-    </div>
-</nav>
+        <div class="p-6">
+            <div class="glass-card p-4 rounded-2xl bg-indigo-500/5 border-indigo-500/20">
+                <p class="text-xs text-gray-400 mb-2">Need help?</p>
+                <button
+                    class="w-full py-2 bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold rounded-lg transition-all">
+                    Contact AI Expert
+                </button>
+            </div>
+        </div>
+    </aside>
 
-<!-- ============================================
+    <!-- ============================================
      MAIN CONTENT
 ============================================ -->
-<main class="max-w-7xl mx-auto px-6 py-8">
-
-    <!-- ── ALERT BANNER (shows if critical issues) -->
-    {% if stats.critical > 0 %}
-    <div class="bg-red-900 border border-red-700 rounded-xl p-4 mb-6 
-                flex items-center gap-3 pulse-red fade-in">
-        <span class="text-2xl">🚨</span>
-        <div>
-            <p class="font-bold text-red-200">
-                {{ stats.critical }} Critical Issues Detected!
-            </p>
-            <p class="text-red-300 text-sm">
-                ₹{{ stats.money_at_risk }} at risk. Take action immediately!
-            </p>
-        </div>
-    </div>
-    {% endif %}
-
-    <!-- ── ROW 1: STATS CARDS -->
-    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-
-        <!-- Critical Issues -->
-        <div class="bg-gray-900 border border-red-800 rounded-xl p-5 fade-in">
-            <div class="flex items-center justify-between mb-3">
-                <span class="text-red-400 text-sm font-medium">Critical</span>
-                <span class="bg-red-900 text-red-300 p-2 rounded-lg">
-                    <i class="fas fa-exclamation-triangle"></i>
-                </span>
+    <div class="flex-1 flex flex-col">
+        <!-- Top Header -->
+        <header
+            class="bg-gray-950/50 backdrop-blur-md border-b border-gray-800 px-8 py-4 flex items-center justify-between sticky top-0 z-40">
+            <div class="flex items-center gap-4">
+                <button class="md:hidden text-gray-400"><i class="fas fa-bars"></i></button>
+                <h2 class="text-xl font-semibold text-white animate-fade-in">Dashboard Overview</h2>
             </div>
-            <p class="text-4xl font-bold text-red-400">
-                {{ stats.critical }}
-            </p>
-            <p class="text-gray-500 text-xs mt-1">Issues need action NOW</p>
-        </div>
 
-        <!-- High Priority -->
-        <div class="bg-gray-900 border border-orange-800 rounded-xl p-5 fade-in">
-            <div class="flex items-center justify-between mb-3">
-                <span class="text-orange-400 text-sm font-medium">High Priority</span>
-                <span class="bg-orange-900 text-orange-300 p-2 rounded-lg">
-                    <i class="fas fa-arrow-up"></i>
-                </span>
+            <div class="flex items-center gap-6">
+                <div class="text-right hidden sm:block">
+                    <p class="text-[10px] text-gray-500 font-bold uppercase tracking-wider">Current Session</p>
+                    <p class="text-xs font-semibold text-gray-300">{{ today }}</p>
+                </div>
+
+                <button onclick="runReport()" id="run-btn" class="btn-premium py-2 px-6">
+                    <i class="fas fa-bolt" id="run-icon"></i>
+                    <span id="run-text">Generate AI Insights</span>
+                </button>
             </div>
-            <p class="text-4xl font-bold text-orange-400">
-                {{ stats.high }}
-            </p>
-            <p class="text-gray-500 text-xs mt-1">Issues to fix today</p>
-        </div>
+        </header>
 
-        <!-- Total Products -->
-        <div class="bg-gray-900 border border-indigo-800 rounded-xl p-5 fade-in">
-            <div class="flex items-center justify-between mb-3">
-                <span class="text-indigo-400 text-sm font-medium">Products</span>
-                <span class="bg-indigo-900 text-indigo-300 p-2 rounded-lg">
-                    <i class="fas fa-box"></i>
-                </span>
-            </div>
-            <p class="text-4xl font-bold text-indigo-400">
-                {{ stats.products }}
-            </p>
-            <p class="text-gray-500 text-xs mt-1">Total in inventory</p>
-        </div>
+        <main class="flex-1 p-8 overflow-y-auto">
 
-        <!-- Money at Risk -->
-        <div class="bg-gray-900 border border-green-800 rounded-xl p-5 fade-in">
-            <div class="flex items-center justify-between mb-3">
-                <span class="text-green-400 text-sm font-medium">Money at Risk</span>
-                <span class="bg-green-900 text-green-300 p-2 rounded-lg">
-                    <i class="fas fa-rupee-sign"></i>
-                </span>
-            </div>
-            <p class="text-4xl font-bold text-green-400">
-                ₹{{ stats.money_at_risk }}
-            </p>
-            <p class="text-gray-500 text-xs mt-1">
-                Save ₹{{ stats.savings }} by acting now
-            </p>
-        </div>
-
-    </div>
-
-    <!-- ── ROW 2: CHARTS -->
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-
-        <!-- Stock Levels Chart -->
-        <div class="bg-gray-900 border border-gray-800 rounded-xl p-6 fade-in">
-            <h2 class="text-white font-bold mb-4 flex items-center gap-2">
-                <i class="fas fa-chart-bar text-indigo-400"></i>
-                Stock Levels
-            </h2>
-            <canvas id="stockChart" height="200"></canvas>
-        </div>
-
-        <!-- Expiry Timeline Chart -->
-        <div class="bg-gray-900 border border-gray-800 rounded-xl p-6 fade-in">
-            <h2 class="text-white font-bold mb-4 flex items-center gap-2">
-                <i class="fas fa-clock text-orange-400"></i>
-                Days Until Expiry
-            </h2>
-            <canvas id="expiryChart" height="200"></canvas>
-        </div>
-
-    </div>
-
-    <!-- ── ROW 3: INVENTORY TABLE -->
-    <div class="bg-gray-900 border border-gray-800 rounded-xl p-6 mb-8 fade-in">
-        <h2 class="text-white font-bold mb-4 flex items-center gap-2">
-            <i class="fas fa-table text-green-400"></i>
-            Today's Inventory
-        </h2>
-
-        <div class="overflow-x-auto">
-            <table class="w-full text-sm">
-                <thead>
-                    <tr class="text-gray-400 border-b border-gray-800">
-                        <th class="text-left py-3 px-4">Product</th>
-                        <th class="text-left py-3 px-4">Category</th>
-                        <th class="text-left py-3 px-4">Stock</th>
-                        <th class="text-left py-3 px-4">Expiry</th>
-                        <th class="text-left py-3 px-4">Price</th>
-                        <th class="text-left py-3 px-4">Expiry Status</th>
-                        <th class="text-left py-3 px-4">Stock Status</th>
-                    </tr>
-                </thead>
-                <tbody id="inventory-table">
-                    {% for item in inventory %}
-                    <tr class="border-b border-gray-800 hover:bg-gray-800 
-                               transition-colors duration-150">
-
-                        <td class="py-3 px-4 font-medium text-white">
-                            {{ item.product_name }}
-                        </td>
-
-                        <td class="py-3 px-4 text-gray-400">
-                            {{ item.category }}
-                        </td>
-
-                        <td class="py-3 px-4">
-                            <span class="font-bold 
-                                {% if item.stock_qty == 0 %}text-red-400
-                                {% elif item.stock_qty < item.min_stock %}text-orange-400
-                                {% else %}text-green-400{% endif %}">
-                                {{ item.stock_qty }}
-                            </span>
-                            <span class="text-gray-500 text-xs"> / {{ item.min_stock }} min</span>
-                        </td>
-
-                        <td class="py-3 px-4 text-gray-300">
-                            {{ item.expiry_date }}
-                        </td>
-
-                        <td class="py-3 px-4 text-gray-300">
-                            ₹{{ item.price }}
-                        </td>
-
-                        <td class="py-3 px-4">
-                            <span class="px-2 py-1 rounded-full text-xs font-medium
-                                {% if item.expiry_status == 'EXPIRED' %}status-expired
-                                {% elif item.expiry_status == 'EXPIRING_CRITICAL' %}status-critical
-                                {% elif item.expiry_status == 'SAFE' %}status-safe
-                                {% else %}status-critical{% endif %}">
-                                {{ item.expiry_status }}
-                            </span>
-                        </td>
-
-                        <td class="py-3 px-4">
-                            <span class="px-2 py-1 rounded-full text-xs font-medium
-                                {% if item.stock_status == 'OUT_OF_STOCK' %}status-out
-                                {% elif item.stock_status == 'LOW_STOCK' %}status-low
-                                {% elif item.stock_status == 'OVERSTOCKED' %}status-over
-                                {% else %}status-safe{% endif %}">
-                                {{ item.stock_status }}
-                            </span>
-                        </td>
-
-                    </tr>
-                    {% else %}
-                    <tr>
-                        <td colspan="7" class="py-8 text-center text-gray-500">
-                            No inventory data yet. Click "Run Report Now"!
-                        </td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        </div>
-    </div>
-
-    <!-- ── ROW 4: AI REPORT + HISTORY -->
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-
-        <!-- Today's AI Report -->
-        <div class="bg-gray-900 border border-gray-800 rounded-xl p-6 fade-in">
-            <h2 class="text-white font-bold mb-4 flex items-center gap-2">
-                <i class="fas fa-robot text-purple-400"></i>
-                Today's AI Report
-            </h2>
-            <div class="bg-gray-950 rounded-lg p-4 text-sm text-gray-300 
-                        whitespace-pre-line leading-relaxed font-mono
-                        max-h-80 overflow-y-auto">
-                {{ stats.report_text }}
-            </div>
-            <!-- Delivery Status -->
-            <div class="flex gap-3 mt-4">
-                <span class="flex items-center gap-1 text-xs
-                    {% if stats.email_sent %}text-green-400{% else %}text-gray-500{% endif %}">
-                    <i class="fas fa-envelope"></i>
-                    Email {% if stats.email_sent %}Sent ✅{% else %}Not sent{% endif %}
-                </span>
-                <span class="flex items-center gap-1 text-xs
-                    {% if stats.whatsapp_sent %}text-green-400{% else %}text-gray-500{% endif %}">
-                    <i class="fab fa-whatsapp"></i>
-                    WhatsApp {% if stats.whatsapp_sent %}Sent ✅{% else %}Not sent{% endif %}
-                </span>
-            </div>
-        </div>
-
-        <!-- Report History -->
-        <div class="bg-gray-900 border border-gray-800 rounded-xl p-6 fade-in">
-            <h2 class="text-white font-bold mb-4 flex items-center gap-2">
-                <i class="fas fa-history text-blue-400"></i>
-                Report History
-            </h2>
-            <div class="space-y-3 max-h-80 overflow-y-auto">
-                {% for report in recent_reports %}
-                <div class="bg-gray-800 rounded-lg p-3 flex items-center 
-                            justify-between hover:bg-gray-750 transition-colors">
-                    <div>
-                        <p class="text-white text-sm font-medium">
-                            {{ report.report_date }}
-                        </p>
-                        <p class="text-gray-400 text-xs">
-                            🚨 {{ report.critical_count }} critical • 
-                            💰 ₹{{ report.money_at_risk }} at risk
-                        </p>
+            <!-- ── URGENT ALERT BANNER -->
+            {% if stats.critical > 0 %}
+            <div class="bg-gradient-to-r from-red-900/40 to-orange-900/40 border border-red-500/30 rounded-3xl p-6 mb-8 
+                    flex items-center justify-between animate-slide-up glow-effect">
+                <div class="flex items-center gap-6">
+                    <div class="w-14 h-14 bg-red-500/20 rounded-2xl flex items-center justify-center text-3xl">
+                        🚨
                     </div>
-                    <div class="flex gap-2">
-                        <span class="text-xs 
-                            {% if report.email_sent %}text-green-400
-                            {% else %}text-gray-600{% endif %}">
-                            <i class="fas fa-envelope"></i>
-                        </span>
-                        <span class="text-xs 
-                            {% if report.whatsapp_sent %}text-green-400
-                            {% else %}text-gray-600{% endif %}">
-                            <i class="fab fa-whatsapp"></i>
-                        </span>
+                    <div>
+                        <h3 class="text-xl font-bold text-red-100">{{ stats.critical }} Critical Issues Need Your
+                            Attention</h3>
+                        <p class="text-red-300/80">Potential loss of ₹{{ stats.money_at_risk }} detected. Immediate
+                            action recommended.</p>
                     </div>
                 </div>
-                {% else %}
-                <p class="text-gray-500 text-sm text-center py-8">
-                    No history yet. Run your first report!
-                </p>
-                {% endfor %}
+                <button
+                    class="bg-red-500 hover:bg-red-400 text-white px-6 py-2 rounded-xl font-bold transition-all hidden lg:block">
+                    View Critical Items
+                </button>
+            </div>
+            {% endif %}
+
+            <!-- ── STATS CARDS GRID -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
+                <!-- Card 1 -->
+                <div class="glass-card p-6 animate-slide-up" style="animation-delay: 0.1s">
+                    <div class="flex justify-between items-start mb-4">
+                        <div class="p-3 bg-red-500/10 rounded-2xl text-red-400">
+                            <i class="fas fa-fire-alt text-xl"></i>
+                        </div>
+                        <span
+                            class="text-[10px] font-bold text-red-500 uppercase tracking-widest bg-red-500/10 px-2 py-1 rounded-md">Urgent</span>
+                    </div>
+                    <h4 class="text-gray-400 text-sm font-medium mb-1">Critical Issues</h4>
+                    <p class="text-3xl font-bold">{{ stats.critical }}</p>
+                    <p class="text-red-400/60 text-xs mt-2 font-medium">Action required immediately</p>
+                </div>
+
+                <!-- Card 2 -->
+                <div class="glass-card p-6 animate-slide-up" style="animation-delay: 0.2s">
+                    <div class="flex justify-between items-start mb-4">
+                        <div class="p-3 bg-orange-500/10 rounded-2xl text-orange-400">
+                            <i class="fas fa-layer-group text-xl"></i>
+                        </div>
+                        <span
+                            class="text-[10px] font-bold text-orange-500 uppercase tracking-widest bg-orange-500/10 px-2 py-1 rounded-md">High</span>
+                    </div>
+                    <h4 class="text-gray-400 text-sm font-medium mb-1">Stock Alerts</h4>
+                    <p class="text-3xl font-bold">{{ stats.high }}</p>
+                    <p class="text-orange-400/60 text-xs mt-2 font-medium">Requires reordering today</p>
+                </div>
+
+                <!-- Card 3 -->
+                <div class="glass-card p-6 animate-slide-up" style="animation-delay: 0.3s">
+                    <div class="flex justify-between items-start mb-4">
+                        <div class="p-3 bg-indigo-500/10 rounded-2xl text-indigo-400">
+                            <i class="fas fa-box-open text-xl"></i>
+                        </div>
+                    </div>
+                    <h4 class="text-gray-400 text-sm font-medium mb-1">Total Products</h4>
+                    <p class="text-3xl font-bold">{{ stats.products }}</p>
+                    <p class="text-indigo-400/60 text-xs mt-2 font-medium">Active in inventory</p>
+                </div>
+
+                <!-- Card 4 -->
+                <div class="glass-card p-6 border-green-500/20 animate-slide-up" style="animation-delay: 0.4s">
+                    <div class="flex justify-between items-start mb-4">
+                        <div class="p-3 bg-green-500/10 rounded-2xl text-green-400">
+                            <i class="fas fa-coins text-xl"></i>
+                        </div>
+                        <div class="text-right">
+                            <span class="text-[10px] font-bold text-green-500 uppercase tracking-widest">Potential
+                                Saving</span>
+                            <p class="text-xs font-bold text-green-400">₹{{ stats.savings }}</p>
+                        </div>
+                    </div>
+                    <h4 class="text-gray-400 text-sm font-medium mb-1">Money at Risk</h4>
+                    <p class="text-3xl font-bold text-green-400">₹{{ stats.money_at_risk }}</p>
+                    <p class="text-gray-500 text-xs mt-2">Recover through AI actions</p>
+                </div>
+            </div>
+
+            <!-- ── CHARTS SECTION -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-10">
+                <div class="glass-card p-8 animate-slide-up" style="animation-delay: 0.5s">
+                    <div class="flex items-center justify-between mb-8">
+                        <h3 class="text-lg font-bold flex items-center gap-3">
+                            <span class="w-2 h-8 bg-indigo-500 rounded-full"></span>
+                            Inventory Distribution
+                        </h3>
+                        <div class="flex gap-2">
+                            <span class="w-3 h-3 rounded-full bg-indigo-500"></span>
+                            <span class="w-3 h-3 rounded-full bg-secondary"></span>
+                        </div>
+                    </div>
+                    <div class="h-64 relative">
+                        <canvas id="stockChart"></canvas>
+                    </div>
+                </div>
+
+                <div class="glass-card p-8 animate-slide-up" style="animation-delay: 0.6s">
+                    <div class="flex items-center justify-between mb-8">
+                        <h3 class="text-lg font-bold flex items-center gap-3">
+                            <span class="w-2 h-8 bg-orange-500 rounded-full"></span>
+                            Risk Timeline
+                        </h3>
+                        <p class="text-xs text-gray-500 font-medium">Days remaining until expiry</p>
+                    </div>
+                    <div class="h-64 relative">
+                        <canvas id="expiryChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ── TABLE SECTION -->
+            <div class="glass-card overflow-hidden animate-slide-up mb-10" style="animation-delay: 0.7s">
+                <div class="p-8 border-b border-gray-800 flex items-center justify-between bg-white/5">
+                    <h3 class="font-bold text-xl">Live Inventory Status</h3>
+                    <div class="flex gap-4">
+                        <input type="text" placeholder="Search product..."
+                            class="bg-gray-950 border border-gray-800 rounded-xl px-4 py-2 text-sm focus:outline-none focus:border-indigo-500 transition-all">
+                        <button class="bg-gray-800 hover:bg-gray-700 px-4 py-2 rounded-xl text-sm transition-all">
+                            <i class="fas fa-filter mr-2"></i> Filter
+                        </button>
+                    </div>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left">
+                        <thead>
+                            <tr
+                                class="text-[10px] text-gray-400 uppercase tracking-widest border-b border-gray-800 bg-gray-900/30">
+                                <th class="py-5 px-8">Product Name</th>
+                                <th class="py-5 px-8">Category</th>
+                                <th class="py-5 px-8">Current Stock</th>
+                                <th class="py-5 px-8">Expiry Date</th>
+                                <th class="py-5 px-8">Status</th>
+                                <th class="py-5 px-8 text-right">Unit Price</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-gray-800/50">
+                            {% for item in inventory %}
+                            <tr class="hover:bg-white/5 transition-all group">
+                                <td class="py-5 px-8">
+                                    <span class="font-semibold text-gray-200 group-hover:text-white transition-all">{{
+                                        item.product_name }}</span>
+                                </td>
+                                <td class="py-5 px-8">
+                                    <span class="text-gray-500 text-xs font-medium">{{ item.category }}</span>
+                                </td>
+                                <td class="py-5 px-8">
+                                    <div class="flex items-center gap-3">
+                                        <div class="flex-1 h-2 bg-gray-800 rounded-full max-w-[100px] overflow-hidden">
+                                            {% set percent = (item.stock_qty / (item.min_stock * 2 if item.min_stock > 0
+                                            else 10)) * 100 %}
+                                            <div class="h-full rounded-full 
+                                            {% if item.stock_qty == 0 %}bg-red-500
+                                            {% elif item.stock_qty < item.min_stock %}bg-orange-500
+                                            {% else %}bg-green-500{% endif %}"
+                                                style="width: {{ percent if percent <= 100 else 100 }}%"></div>
+                                        </div>
+                                        <span class="text-sm font-bold text-gray-300">{{ item.stock_qty }}</span>
+                                    </div>
+                                </td>
+                                <td class="py-5 px-8 text-gray-400 text-sm font-medium">{{ item.expiry_date }}</td>
+                                <td class="py-5 px-8">
+                                    <div class="flex flex-col gap-1">
+                                        <span
+                                            class="status-badge text-[9px] w-fit {% if item.expiry_status == 'EXPIRED' %}status-expired{% elif item.expiry_status == 'EXPIRING_CRITICAL' %}status-critical{% else %}status-safe{% endif %}">
+                                            {{ item.expiry_status }}
+                                        </span>
+                                        <span
+                                            class="status-badge text-[9px] w-fit {% if item.stock_status == 'OUT_OF_STOCK' %}status-out{% elif item.stock_status == 'LOW_STOCK' %}status-low{% else %}status-over{% endif %}">
+                                            {{ item.stock_status }}
+                                        </span>
+                                    </div>
+                                </td>
+                                <td class="py-5 px-8 text-right font-bold text-gray-200">₹{{ item.price }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- ── AI INSIGHTS & HISTORY -->
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-10">
+                <!-- AI Report -->
+                <div class="lg:col-span-2 glass-card p-8 animate-slide-up" style="animation-delay: 0.8s">
+                    <div class="flex items-center justify-between mb-6">
+                        <h3 class="text-xl font-bold flex items-center gap-3">
+                            <i class="fas fa-robot text-indigo-400"></i>
+                            AI Strategic Report
+                        </h3>
+                        <div class="flex gap-2">
+                            <span
+                                class="text-xs font-bold px-3 py-1 bg-indigo-500/10 text-indigo-400 rounded-full border border-indigo-500/20">
+                                {{ today }}
+                            </span>
+                        </div>
+                    </div>
+
+                    <div
+                        class="bg-gray-950/50 rounded-2xl p-6 border border-gray-800 text-gray-300 whitespace-pre-line leading-relaxed text-sm font-medium max-h-[500px] overflow-y-auto">
+                        {{ stats.report_text }}
+                    </div>
+
+                    <div class="flex gap-6 mt-6">
+                        <div class="flex items-center gap-2">
+                            <div
+                                class="w-2 h-2 rounded-full {% if stats.email_sent %}bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.5)]{% else %}bg-gray-700{% endif %}">
+                            </div>
+                            <span
+                                class="text-xs font-bold {% if stats.email_sent %}text-green-400{% else %}text-gray-500{% endif %} uppercase tracking-wider">Email
+                                Dispatch</span>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <div
+                                class="w-2 h-2 rounded-full {% if stats.whatsapp_sent %}bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.5)]{% else %}bg-gray-700{% endif %}">
+                            </div>
+                            <span
+                                class="text-xs font-bold {% if stats.whatsapp_sent %}text-green-400{% else %}text-gray-500{% endif %} uppercase tracking-wider">WhatsApp
+                                Alert</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- History -->
+                <div class="glass-card p-8 animate-slide-up" style="animation-delay: 0.9s">
+                    <h3 class="text-xl font-bold flex items-center gap-3 mb-6">
+                        <i class="fas fa-history text-orange-400"></i>
+                        Recent Reports
+                    </h3>
+                    <div class="space-y-4 max-h-[500px] overflow-y-auto pr-2">
+                        {% for report in recent_reports %}
+                        <div
+                            class="p-4 bg-white/5 border border-gray-800 rounded-2xl hover:border-indigo-500/30 transition-all cursor-pointer group">
+                            <p class="text-sm font-bold text-gray-200 group-hover:text-indigo-400 transition-all">{{
+                                report.report_date }}</p>
+                            <div class="flex justify-between items-center mt-2">
+                                <div class="flex gap-2">
+                                    <span class="text-[10px] font-bold text-red-400">🚨 {{ report.critical_count
+                                        }}</span>
+                                    <span class="text-[10px] font-bold text-gray-500">💰 ₹{{ report.money_at_risk
+                                        }}</span>
+                                </div>
+                                <div class="flex gap-1">
+                                    <i
+                                        class="fas fa-envelope text-[10px] {% if report.email_sent %}text-green-500{% else %}text-gray-700{% endif %}"></i>
+                                    <i
+                                        class="fab fa-whatsapp text-[10px] {% if report.whatsapp_sent %}text-green-500{% else %}text-gray-700{% endif %}"></i>
+                                </div>
+                            </div>
+                        </div>
+                        {% else %}
+                        <div class="text-center py-10 opacity-30">
+                            <i class="fas fa-folder-open text-4xl mb-3"></i>
+                            <p class="text-xs uppercase font-bold tracking-widest">No History</p>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- ── FOOTER -->
+            <footer class="mt-20 py-10 border-t border-gray-900 flex flex-col items-center gap-4 text-gray-600">
+                <p class="text-sm font-medium">Premium AI Shop Intelligence System v1.0</p>
+                <div class="flex gap-6">
+                    <a href="#" class="hover:text-indigo-400 transition-all"><i class="fab fa-github"></i></a>
+                    <a href="#" class="hover:text-indigo-400 transition-all"><i class="fab fa-twitter"></i></a>
+                    <a href="#" class="hover:text-indigo-400 transition-all"><i class="fas fa-globe"></i></a>
+                </div>
+            </footer>
+        </main>
+    </div>
+
+    <!-- ============================================
+     TOAST SYSTEM
+============================================ -->
+    <div id="toast"
+        class="fixed bottom-10 right-10 z-[100] transform translate-y-32 opacity-0 transition-all duration-500">
+        <div class="glass-card p-5 bg-gray-900 border-indigo-500/30 min-w-[320px] flex items-center gap-4">
+            <div id="toast-icon-bg" class="w-12 h-12 rounded-2xl flex items-center justify-center text-xl">
+                <i id="toast-icon"></i>
+            </div>
+            <div>
+                <h5 id="toast-title" class="font-bold text-white text-sm"></h5>
+                <p id="toast-msg" class="text-gray-500 text-xs"></p>
             </div>
         </div>
-
     </div>
 
-</main>
+    <script>
+        // ── CHART INITIALIZATION
+        document.addEventListener('DOMContentLoaded', async function () {
+            const res = await fetch('/api/inventory');
+            const items = await res.json();
+            if (items.length === 0) return;
 
-<!-- ============================================
-     SUCCESS/ERROR TOAST NOTIFICATION
-============================================ -->
-<div id="toast"
-     class="fixed bottom-6 right-6 bg-gray-800 text-white px-6 py-4 
-            rounded-xl shadow-2xl border border-gray-700
-            transform translate-y-20 opacity-0 transition-all duration-300
-            flex items-center gap-3 max-w-sm z-50">
-    <span id="toast-icon" class="text-2xl">✅</span>
-    <div>
-        <p id="toast-title" class="font-bold text-sm"></p>
-        <p id="toast-msg" class="text-gray-400 text-xs"></p>
-    </div>
-</div>
+            const names = items.map(i => i.name);
+            const stocks = items.map(i => i.stock);
+            const expiry = items.map(i => Math.max(0, i.days_to_expiry));
 
-<!-- ============================================
-     JAVASCRIPT
-============================================ -->
-<script>
-// ── CHARTS SETUP
-document.addEventListener('DOMContentLoaded', async function() {
-    // Fetch inventory data for charts
-    const res = await fetch('/api/inventory');
-    const items = await res.json();
+            Chart.defaults.color = '#6b7280';
+            Chart.defaults.font.family = "'Inter', sans-serif";
 
-    if (items.length === 0) return;
-
-    const names   = items.map(i => i.name);
-    const stocks  = items.map(i => i.stock);
-    const expiry  = items.map(i => Math.max(0, i.days_to_expiry));
-
-    // Stock Bar Chart
-    const stockCtx = document.getElementById('stockChart').getContext('2d');
-    new Chart(stockCtx, {
-        type: 'bar',
-        data: {
-            labels: names,
-            datasets: [{
-                label: 'Current Stock',
-                data: stocks,
-                backgroundColor: stocks.map(s =>
-                    s === 0 ? '#ef4444' :
-                    s < 5   ? '#f97316' :
-                              '#6366f1'
-                ),
-                borderRadius: 6,
-            }]
-        },
-        options: {
-            responsive: true,
-            plugins: {
-                legend: { display: false }
-            },
-            scales: {
-                x: {
-                    ticks: { color: '#9ca3af' },
-                    grid:  { color: '#1f2937' }
+            // Stock Chart
+            new Chart(document.getElementById('stockChart'), {
+                type: 'line',
+                data: {
+                    labels: names,
+                    datasets: [{
+                        label: 'Units',
+                        data: stocks,
+                        borderColor: '#6366f1',
+                        backgroundColor: 'rgba(99, 102, 241, 0.1)',
+                        borderWidth: 3,
+                        fill: true,
+                        tension: 0.4,
+                        pointBackgroundColor: '#6366f1',
+                        pointRadius: 4,
+                        pointHoverRadius: 6
+                    }]
                 },
-                y: {
-                    ticks: { color: '#9ca3af' },
-                    grid:  { color: '#1f2937' }
+                options: {
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        y: { beginAtZero: true, grid: { color: 'rgba(255,255,255,0.05)' } },
+                        x: { grid: { display: false } }
+                    }
                 }
+            });
+
+            // Expiry Chart
+            new Chart(document.getElementById('expiryChart'), {
+                type: 'bar',
+                data: {
+                    labels: names,
+                    datasets: [{
+                        label: 'Days',
+                        data: expiry,
+                        backgroundColor: '#f97316',
+                        borderRadius: 8,
+                        barThickness: 20
+                    }]
+                },
+                options: {
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        y: { grid: { color: 'rgba(255,255,255,0.05)' } },
+                        x: { grid: { display: false } }
+                    }
+                }
+            });
+        });
+
+        // ── RUN REPORT LOGIC
+        async function runReport() {
+            const btn = document.getElementById('run-btn');
+            const icon = document.getElementById('run-icon');
+            const text = document.getElementById('run-text');
+
+            btn.disabled = true;
+            btn.classList.add('opacity-50', 'bg-gray-700');
+            icon.className = 'fas fa-spinner fa-spin';
+            text.textContent = 'Analyzing...';
+
+            try {
+                const res = await fetch('/api/run-report', { method: 'POST' });
+                const data = await res.json();
+
+                if (data.success) {
+                    showToast('fas fa-check-circle', 'Analysis Complete', 'Insights delivered successfully!', 'bg-green-500/20 text-green-400');
+                    setTimeout(() => window.location.reload(), 2000);
+                } else {
+                    showToast('fas fa-times-circle', 'Error', data.message, 'bg-red-500/20 text-red-400');
+                }
+            } catch (err) {
+                showToast('fas fa-exclamation-triangle', 'Offline', 'Server unavailable.', 'bg-red-500/20 text-red-400');
+            } finally {
+                btn.disabled = false;
+                btn.classList.remove('opacity-50', 'bg-gray-700');
+                icon.className = 'fas fa-bolt';
+                text.textContent = 'Generate AI Insights';
             }
         }
-    });
 
-    // Expiry Doughnut Chart
-    const expiryCtx = document.getElementById('expiryChart').getContext('2d');
-    new Chart(expiryCtx, {
-        type: 'bar',
-        data: {
-            labels: names,
-            datasets: [{
-                label: 'Days to Expiry',
-                data: expiry,
-                backgroundColor: expiry.map(d =>
-                    d === 0   ? '#ef4444' :
-                    d <= 2    ? '#f97316' :
-                    d <= 7    ? '#eab308' :
-                                '#22c55e'
-                ),
-                borderRadius: 6,
-            }]
-        },
-        options: {
-            responsive: true,
-            plugins: {
-                legend: { display: false }
-            },
-            scales: {
-                x: {
-                    ticks: { color: '#9ca3af' },
-                    grid:  { color: '#1f2937' }
-                },
-                y: {
-                    ticks: { color: '#9ca3af' },
-                    grid:  { color: '#1f2937' }
-                }
-            }
+        function showToast(icon, title, msg, theme) {
+            const toast = document.getElementById('toast');
+            const toastIcon = document.getElementById('toast-icon');
+            const iconBg = document.getElementById('toast-icon-bg');
+
+            document.getElementById('toast-title').innerText = title;
+            document.getElementById('toast-msg').innerText = msg;
+            toastIcon.className = icon;
+            iconBg.className = `w-12 h-12 rounded-2xl flex items-center justify-center text-xl ${theme}`;
+
+            toast.classList.remove('translate-y-32', 'opacity-0');
+            setTimeout(() => toast.classList.add('translate-y-32', 'opacity-0'), 4000);
         }
-    });
-});
-
-
-// ── RUN REPORT BUTTON
-async function runReport() {
-    const btn  = document.getElementById('run-btn');
-    const icon = document.getElementById('run-icon');
-    const text = document.getElementById('run-text');
-
-    // Show loading state
-    btn.disabled = true;
-    btn.classList.add('opacity-75');
-    icon.className = 'fas fa-spinner fa-spin';
-    text.textContent = 'Running...';
-
-    try {
-        const res  = await fetch('/api/run-report', { method: 'POST' });
-        const data = await res.json();
-
-        if (data.success) {
-            showToast('✅', 'Report Generated!',
-                      'Email + WhatsApp sent successfully!');
-            // Reload page after 2 seconds to show new data
-            setTimeout(() => window.location.reload(), 2000);
-        } else {
-            showToast('❌', 'Error!', data.message);
-        }
-
-    } catch (err) {
-        showToast('❌', 'Error!', 'Something went wrong!');
-    } finally {
-        // Reset button
-        btn.disabled = false;
-        btn.classList.remove('opacity-75');
-        icon.className = 'fas fa-play';
-        text.textContent = 'Run Report Now';
-    }
-}
-
-
-// ── TOAST NOTIFICATION
-function showToast(icon, title, message) {
-    const toast = document.getElementById('toast');
-    document.getElementById('toast-icon').textContent  = icon;
-    document.getElementById('toast-title').textContent = title;
-    document.getElementById('toast-msg').textContent   = message;
-
-    // Show toast
-    toast.classList.remove('translate-y-20', 'opacity-0');
-    toast.classList.add('translate-y-0', 'opacity-100');
-
-    // Hide after 4 seconds
-    setTimeout(() => {
-        toast.classList.add('translate-y-20', 'opacity-0');
-        toast.classList.remove('translate-y-0', 'opacity-100');
-    }, 4000);
-}
-
-
-// ── AUTO REFRESH every 5 minutes
-setTimeout(() => window.location.reload(), 5 * 60 * 1000);
-</script>
+    </script>
 
 </body>
+
 </html>

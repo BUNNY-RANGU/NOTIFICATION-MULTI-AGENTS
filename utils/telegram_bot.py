@@ -413,7 +413,7 @@ async def send_telegram_alert(report_text, analysis):
     Called automatically at 8AM from scheduler.
     """
     if not TOKEN or not CHAT_ID:
-        print("❌ Telegram credentials missing!")
+        print("Telegram credentials missing!")
         return False
 
     try:
@@ -434,11 +434,11 @@ async def send_telegram_alert(report_text, analysis):
             parse_mode = "Markdown"
         )
 
-        print("✅ Telegram alert sent!")
+        print("Telegram alert sent!")
         return True
 
     except Exception as e:
-        print(f"❌ Telegram error: {e}")
+        print(f"Telegram error: {e}")
         return False
 
 
@@ -456,7 +456,7 @@ def send_telegram_alert_sync(report_text, analysis):
         loop.close()
         return result
     except Exception as e:
-        print(f"❌ Telegram sync error: {e}")
+        print(f"Telegram sync error: {e}")
         return False
 
 
@@ -467,10 +467,10 @@ def send_telegram_alert_sync(report_text, analysis):
 def run_bot():
     """Starts the Telegram bot. Runs forever."""
     if not TOKEN:
-        print("❌ TELEGRAM_BOT_TOKEN missing in .env!")
+        print("TELEGRAM_BOT_TOKEN missing in .env!")
         return
 
-    print("🤖 Starting Telegram bot...")
+    print("Starting Telegram bot...")
     print("   Open Telegram and message your bot!")
 
     # Build application
@@ -491,7 +491,7 @@ def run_bot():
         handle_message
     ))
 
-    print("✅ Bot is running! Press Ctrl+C to stop.")
+    print("Bot is running! Press Ctrl+C to stop.")
 
     # Start polling for messages
     app.run_polling(allowed_updates=Update.ALL_TYPES)

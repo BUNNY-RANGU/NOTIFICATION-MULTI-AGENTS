@@ -166,18 +166,18 @@ if __name__ == "__main__":
     print("=" * 55)
     print("🤖 SHOP AI AGENT — SCHEDULER STARTED!")
     print("=" * 55)
-    print("⏰ Daily report will run at 8:00 AM every day")
-    print("🛑 Press Ctrl+C to stop")
+    print("   Daily report will run at 7:00 AM every day")
+    print("   Press Ctrl+C to stop")
     print("=" * 55)
 
-    # Schedule the job at 8AM every day
-    schedule.every().day.at("08:00").do(run_daily_report)
+    # Schedule the job at 7AM every day
+    schedule.every().day.at("07:00").do(run_daily_report)
 
     # Also run immediately RIGHT NOW for testing!
-    print("\n🧪 Running once RIGHT NOW for testing...")
+    print("\n[TEST] Running once RIGHT NOW for testing...")
     run_daily_report()
 
-    print("\n⏳ Scheduler is now waiting for 8AM...")
+    print("\n   Scheduler is now waiting for 7AM...")
     print("   Keep this terminal open!")
 
     # Keep running forever

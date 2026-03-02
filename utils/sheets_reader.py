@@ -38,30 +38,30 @@ def connect_to_sheet():
             sheet_name = os.getenv("GOOGLE_SHEET_NAME", "ShopInventory")
             spreadsheet = client.open(sheet_name)
             worksheet = spreadsheet.sheet1
-            print("✅ Google Sheets connected!")
+            print("Google Sheets connected!")
             return worksheet
 
         except FileNotFoundError:
-            print("❌ credentials.json not found!")
+            print("credentials.json not found!")
             return None
 
         except gspread.exceptions.SpreadsheetNotFound:
-            print("❌ Sheet not found! Check name in .env")
+            print("Sheet not found! Check name in .env")
             return None
 
         except Exception as e:
-            print(f"⚠️  Attempt {attempt}/{MAX_RETRIES} failed: {e}")
+            print(f"Attempt {attempt}/{MAX_RETRIES} failed: {e}")
             if attempt < MAX_RETRIES:
                 print(f"   Retrying in 5 seconds...")
                 import time
                 time.sleep(5)
             else:
-                print("❌ All retries failed! Using backup.")
+                print("All retries failed! Using backup.")
                 return None
 
 
 def read_inventory():
-    print("\n📊 Reading inventory...")
+    print("\nReading inventory...")
     worksheet = connect_to_sheet()
 
     if worksheet:
@@ -70,7 +70,7 @@ def read_inventory():
             save_cache(inventory)
             return inventory
 
-    print("⚠️  Trying local backup...")
+    print("Trying local backup...")
     return read_from_cache()
 
 
@@ -79,7 +79,7 @@ def read_from_sheet(worksheet):
         all_rows = worksheet.get_all_records()
 
         if not all_rows:
-            print("⚠️  Sheet is empty!")
+            print("Sheet is empty!")
             return []
 
         clean_inventory = []
@@ -98,11 +98,11 @@ def read_from_sheet(worksheet):
             }
             clean_inventory.append(item)
 
-        print(f"✅ Read {len(clean_inventory)} products!")
+        print(f"Read {len(clean_inventory)} products!")
         return clean_inventory
 
     except Exception as e:
-        print(f"❌ ERROR reading sheet: {e}")
+        print(f"ERROR reading sheet: {e}")
         return []
 
 
@@ -112,26 +112,26 @@ def save_cache(inventory):
         cache_data = {"inventory": inventory}
         with open(CACHE_FILE, "w") as f:
             json.dump(cache_data, f, indent=2)
-        print(f"💾 Backup saved!")
+        print(f"Backup saved!")
     except Exception as e:
-        print(f"⚠️  Could not save backup: {e}")
+        print(f"Could not save backup: {e}")
 
 
 def read_from_cache():
     try:
         if not os.path.exists(CACHE_FILE):
-            print("❌ No backup found!")
+            print("No backup found!")
             return []
 
         with open(CACHE_FILE, "r") as f:
             cache_data = json.load(f)
 
         inventory = cache_data.get("inventory", [])
-        print(f"✅ Loaded {len(inventory)} products from backup!")
+        print(f"Loaded {len(inventory)} products from backup!")
         return inventory
 
     except Exception as e:
-        print(f"❌ ERROR reading backup: {e}")
+        print(f"ERROR reading backup: {e}")
         return []
 
 

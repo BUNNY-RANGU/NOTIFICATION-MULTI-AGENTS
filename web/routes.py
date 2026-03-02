@@ -26,6 +26,15 @@ templates = Jinja2Templates(directory="web/templates")
 # =====================================================
 
 @router.get("/", response_class=HTMLResponse)
+async def landing(request: Request):
+    """Landing page with pricing."""
+    return templates.TemplateResponse(
+        "landing.html",
+        {"request": request}
+    )
+
+
+@router.get("/dashboard", response_class=HTMLResponse)
 async def dashboard(request: Request, db: Session = Depends(get_db)):
     """
     Main dashboard page.
@@ -190,14 +199,28 @@ async def run_report_now(db: Session = Depends(get_db)):
 # =====================================================
 
 def save_report_to_db(db, analysis, report_text,
-                       email_sent, whatsapp_sent):
+                       email_sent, whatsapp_sent, shop_id=None):
     """Saves daily report to database."""
+    from web.models import Shop
+    
+    # If no shop_id, use the first one (for demo/default)
+    if not shop_id:
+        shop = db.query(Shop).first()
+        if not shop:
+            # Create a default shop if none exists
+            shop = Shop(shop_name="Default Shop", owner_email="admin@example.com")
+            db.add(shop)
+            db.commit()
+            db.refresh(shop)
+        shop_id = shop.id
+
     today = date.today().strftime("%Y-%m-%d")
     savings = round(analysis["total_potential_loss"] * 0.7, 2)
 
     # Check if report for today already exists
     existing = db.query(DailyReport).filter(
-        DailyReport.report_date == today
+        DailyReport.report_date == today,
+        DailyReport.shop_id == shop_id
     ).first()
 
     if existing:
@@ -214,6 +237,7 @@ def save_report_to_db(db, analysis, report_text,
     else:
         # Create new
         new_report = DailyReport(
+            shop_id           = shop_id,
             report_date       = today,
             critical_count    = analysis["critical_count"],
             high_count        = analysis["high_count"],
@@ -228,11 +252,17 @@ def save_report_to_db(db, analysis, report_text,
         db.add(new_report)
 
     db.commit()
-    print("✅ Report saved to database!")
+    print(f"✅ Report saved to database for shop {shop_id}!")
 
 
-def save_inventory_to_db(db, inventory, analysis):
+def save_inventory_to_db(db, inventory, analysis, shop_id=None):
     """Saves inventory snapshot to database."""
+    from web.models import Shop
+    
+    if not shop_id:
+        shop = db.query(Shop).first()
+        shop_id = shop.id if shop else 1
+
     today = date.today().strftime("%Y-%m-%d")
 
     # Build lookup dicts for statuses
@@ -245,12 +275,19 @@ def save_inventory_to_db(db, inventory, analysis):
         for r in analysis["stock_results"]
     }
 
+    # Remove old snapshots for today/shop to avoid duplicates
+    db.query(InventorySnapshot).filter(
+        InventorySnapshot.snapshot_date == today,
+        InventorySnapshot.shop_id == shop_id
+    ).delete()
+
     for item in inventory:
         name = item["product_name"]
         expiry_info = expiry_lookup.get(name, {})
         stock_info  = stock_lookup.get(name, {})
 
         snapshot = InventorySnapshot(
+            shop_id        = shop_id,
             snapshot_date  = today,
             product_name   = name,
             category       = item["category"],
@@ -265,4 +302,94 @@ def save_inventory_to_db(db, inventory, analysis):
         db.add(snapshot)
 
     db.commit()
-    print("✅ Inventory saved to database!")
+    print(f"✅ Inventory saved to database for shop {shop_id}!")
+
+
+# =====================================================
+# PAYMENT & REGISTRATION ROUTES
+# =====================================================
+
+@router.post("/api/register-shop")
+async def register_shop(
+    shop_data: dict,
+    db: Session = Depends(get_db)
+):
+    """Registers a new shop owner."""
+    try:
+        from web.models import Shop
+
+        # Check if already exists
+        existing = db.query(Shop).filter(
+            Shop.owner_email == shop_data.get("owner_email")
+        ).first()
+
+        if existing:
+            return {
+                "success": True,
+                "message": "Shop already registered!"
+            }
+
+        # Create new shop
+        new_shop = Shop(
+            shop_name       = shop_data.get("shop_name"),
+            owner_name      = shop_data.get("owner_name"),
+            owner_email     = shop_data.get("owner_email"),
+            owner_phone     = shop_data.get("owner_phone"),
+            sheet_name      = shop_data.get("sheet_name",
+                                            "ShopInventory"),
+            whatsapp_number = shop_data.get("owner_phone"),
+            is_active       = False,
+            plan            = "trial"
+        )
+        db.add(new_shop)
+        db.commit()
+
+        return {
+            "success": True,
+            "message": "Shop registered!"
+        }
+
+    except Exception as e:
+        return {"success": False, "message": str(e)}
+
+
+@router.post("/api/create-order")
+async def create_payment_order(payment_data: dict):
+    """Creates Razorpay payment order."""
+    from utils.payments import create_order
+
+    result = create_order(
+        amount_rupees = 499,
+        shop_name     = payment_data.get("shop_name", ""),
+        owner_email   = payment_data.get("email", "")
+    )
+    return result
+
+
+@router.post("/api/verify-payment")
+async def verify_payment(
+    payment_data: dict,
+    db: Session = Depends(get_db)
+):
+    """Verifies payment and activates subscription."""
+    from utils.payments import verify_payment, activate_shop_subscription
+
+    # Verify signature
+    is_valid = verify_payment(
+        order_id   = payment_data.get("order_id"),
+        payment_id = payment_data.get("payment_id"),
+        signature  = payment_data.get("signature")
+    )
+
+    if is_valid:
+        # Activate subscription
+        activate_shop_subscription(
+            owner_email = payment_data.get("email"),
+            payment_id  = payment_data.get("payment_id")
+        )
+        return {"success": True}
+    else:
+        return {
+            "success": False,
+            "message": "Payment verification failed!"
+        }

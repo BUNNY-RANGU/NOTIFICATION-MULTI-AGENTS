@@ -50,12 +50,12 @@ def call_groq(system_prompt, user_message):
             return response.choices[0].message.content
 
         except Exception as e:
-            print(f"⚠️  Groq attempt {attempt}/{MAX_RETRIES}: {e}")
+            print(f"Groq attempt {attempt}/{MAX_RETRIES}: {e}")
             if attempt < MAX_RETRIES:
                 import time
                 time.sleep(3)
             else:
-                print("❌ Groq failed! Using fallback response.")
+                print("Groq failed! Using fallback response.")
                 return None
 
 
@@ -69,7 +69,7 @@ def agent_data_reader(inventory):
     Agent 1: Reads raw inventory data.
     Returns a clean plain-english summary.
     """
-    print("\n🤖 Agent 1 (Groq) → Reading data...")
+    print("\nAgent 1 (Groq) -> Reading data...")
 
     # Convert inventory list to readable text for the AI
     inventory_text = ""
@@ -97,7 +97,7 @@ Give me a clean 5-line summary of this inventory."""
     result = call_groq(system_prompt, user_message)
 
     if result:
-        print("✅ Agent 1 done!")
+        print("Agent 1 done!")
         return result
     else:
         # Fallback if Groq fails
@@ -114,10 +114,10 @@ def agent_expiry_checker(expiry_issues):
     Agent 2: Analyzes expiry problems.
     Gives specific discount and action recommendations.
     """
-    print("\n🤖 Agent 2 (Groq) → Checking expiry issues...")
+    print("\nAgent 2 (Groq) -> Checking expiry issues...")
 
     if not expiry_issues:
-        print("✅ Agent 2 done! No expiry issues.")
+        print("Agent 2 done! No expiry issues.")
         return "No expiry issues found. All products are within safe dates."
 
     # Build expiry issues text
@@ -147,7 +147,7 @@ Be brutal and direct. What should the owner do TODAY?"""
     result = call_groq(system_prompt, user_message)
 
     if result:
-        print("✅ Agent 2 done!")
+        print("Agent 2 done!")
         return result
     else:
         return "Check expiring products immediately and apply discounts."

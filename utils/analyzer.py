@@ -77,7 +77,7 @@ def check_expiry(item):
             "product_name": product_name,
             "status": "EXPIRED",
             "days_left": days_left,
-            "action": "🚨 REMOVE FROM SHELF IMMEDIATELY! Do not sell!",
+            "action": "REMOVE FROM SHELF IMMEDIATELY! Do not sell!",
             "discount": 100,
             "urgency": "CRITICAL",
             "potential_loss": potential_loss
@@ -89,7 +89,7 @@ def check_expiry(item):
             "product_name": product_name,
             "status": "EXPIRING_CRITICAL",
             "days_left": days_left,
-            "action": f"🔴 50% FLASH SALE NOW! Only {days_left} day(s) left!",
+            "action": f"50% FLASH SALE NOW! Only {days_left} day(s) left!",
             "discount": 50,
             "urgency": "CRITICAL",
             "potential_loss": potential_loss
@@ -101,7 +101,7 @@ def check_expiry(item):
             "product_name": product_name,
             "status": "EXPIRING_HIGH",
             "days_left": days_left,
-            "action": "🟠 30% OFF today. Push on WhatsApp status now!",
+            "action": "30% OFF today. Push on WhatsApp status now!",
             "discount": 30,
             "urgency": "HIGH",
             "potential_loss": potential_loss
@@ -113,7 +113,7 @@ def check_expiry(item):
             "product_name": product_name,
             "status": "EXPIRING_MEDIUM",
             "days_left": days_left,
-            "action": f"🟡 15% OFF. Bundle with other items. {days_left} days left.",
+            "action": f"15% OFF. Bundle with other items. {days_left} days left.",
             "discount": 15,
             "urgency": "MEDIUM",
             "potential_loss": potential_loss
@@ -125,7 +125,7 @@ def check_expiry(item):
             "product_name": product_name,
             "status": "SAFE",
             "days_left": days_left,
-            "action": "✅ Safe. No action needed.",
+            "action": "Safe. No action needed.",
             "discount": 0,
             "urgency": "NONE",
             "potential_loss": 0
@@ -167,7 +167,7 @@ def check_stock(item):
             "status": "OUT_OF_STOCK",
             "stock_qty": stock_qty,
             "min_stock": min_stock,
-            "action": "🚨 OUT OF STOCK! Order immediately. Losing sales right now!",
+            "action": "OUT OF STOCK! Order immediately. Losing sales right now!",
             "urgency": "CRITICAL",
             "reorder_qty": min_stock * 2  # order double the minimum
         }
@@ -180,7 +180,7 @@ def check_stock(item):
             "status": "LOW_STOCK",
             "stock_qty": stock_qty,
             "min_stock": min_stock,
-            "action": f"🟠 LOW STOCK! Only {stock_qty} left. Order {reorder_qty} units today!",
+            "action": f"LOW STOCK! Only {stock_qty} left. Order {reorder_qty} units today!",
             "urgency": "HIGH",
             "reorder_qty": reorder_qty
         }
@@ -194,7 +194,7 @@ def check_stock(item):
             "status": "OVERSTOCKED",
             "stock_qty": stock_qty,
             "min_stock": min_stock,
-            "action": f"🟡 OVERSTOCKED! Run BOGO deal. ₹{money_stuck} stuck in excess stock!",
+            "action": f"OVERSTOCKED! Run BOGO deal. Rs.{money_stuck} stuck in excess stock!",
             "urgency": "MEDIUM",
             "reorder_qty": 0
         }
@@ -206,7 +206,7 @@ def check_stock(item):
             "status": "NORMAL",
             "stock_qty": stock_qty,
             "min_stock": min_stock,
-            "action": "✅ Stock level is good.",
+            "action": "Stock level is good.",
             "urgency": "NONE",
             "reorder_qty": 0
         }
@@ -229,7 +229,7 @@ def analyze_inventory(inventory):
     - total_potential_loss: total money at risk
     - summary: counts of each problem type
     """
-    print("\n🔍 Analyzing inventory for problems...")
+    print("\nAnalyzing inventory for problems...")
 
     expiry_results = []
     stock_results = []
@@ -259,11 +259,11 @@ def analyze_inventory(inventory):
     medium_count = len([r for r in expiry_results + stock_results 
                        if r["urgency"] == "MEDIUM"])
 
-    print(f"✅ Analysis complete!")
-    print(f"   🚨 Critical issues : {critical_count}")
-    print(f"   🟠 High issues     : {high_count}")
-    print(f"   🟡 Medium issues   : {medium_count}")
-    print(f"   💰 Money at risk   : ₹{total_potential_loss}")
+    print(f"Analysis complete!")
+    print(f"   Critical issues : {critical_count}")
+    print(f"   High issues     : {high_count}")
+    print(f"   Medium issues   : {medium_count}")
+    print(f"   Money at risk   : Rs.{total_potential_loss}")
 
     return {
         "expiry_results": expiry_results,
@@ -303,5 +303,5 @@ def parse_date(date_str):
             continue
 
     # None of the formats worked
-    print(f"⚠️  Could not parse date: {date_str}")
+    print(f"Could not parse date: {date_str}")
     return None
