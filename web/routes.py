@@ -367,14 +367,20 @@ async def create_payment_order(payment_data: dict):
 
 
 @router.post("/api/verify-payment")
-async def verify_payment(
+async def verify_payment_route(
     payment_data: dict,
     db: Session = Depends(get_db)
 ):
-    """Verifies payment and activates subscription."""
-    from utils.payments import verify_payment, activate_shop_subscription
+    """
+    Verifies Razorpay payment signature and activates subscription.
+    On success → sends WhatsApp to BOTH owner and admin instantly!
+    """
+    from utils.payments import (verify_payment,
+                                 activate_shop_subscription,
+                                 send_payment_notifications)
+    from web.models import Shop
 
-    # Verify signature
+    # ── Step 1: Cryptographically verify the payment signature
     is_valid = verify_payment(
         order_id   = payment_data.get("order_id"),
         payment_id = payment_data.get("payment_id"),
@@ -382,14 +388,287 @@ async def verify_payment(
     )
 
     if is_valid:
-        # Activate subscription
+        email      = payment_data.get("email")
+        payment_id = payment_data.get("payment_id")
+
+        # ── Step 2: Activate subscription in database
         activate_shop_subscription(
-            owner_email = payment_data.get("email"),
-            payment_id  = payment_data.get("payment_id")
+            owner_email = email,
+            payment_id  = payment_id
         )
+
+        # ── Step 3: Get owner details from database
+        shop = db.query(Shop).filter(
+            Shop.owner_email == email
+        ).first()
+
+        # ── Step 4: Fire WhatsApp to BOTH owner and admin!
+        if shop:
+            wa_sent = send_payment_notifications(
+                owner_name  = shop.owner_name  or "Shop Owner",
+                owner_email = shop.owner_email or email,
+                owner_phone = shop.owner_phone or "",
+                payment_id  = payment_id
+            )
+            print(f"{'✅' if wa_sent else '⚠️'} WhatsApp notifications: "
+                  f"{'sent' if wa_sent else 'failed (check Twilio)'}")
+        else:
+            print(f"⚠️  Shop not found for {email} — skipping WhatsApp")
+
         return {"success": True}
+
     else:
         return {
             "success": False,
             "message": "Payment verification failed!"
         }
+
+
+# =====================================================
+# UPI PAYMENT CONFIRMATION — Sends alerts to user + admin
+# =====================================================
+
+@router.post("/api/confirm-upi-payment")
+async def confirm_upi_payment(payment_data: dict):
+    """
+    Called when a user confirms their UPI payment.
+    Sends instant WhatsApp + Telegram + Email notifications to:
+      1. The USER  — confirming their payment was received
+      2. The ADMIN — alerting them that new payment came in
+    """
+    import os
+    from datetime import datetime
+
+    name      = payment_data.get("name", "Customer")
+    email     = payment_data.get("email", "")
+    phone     = payment_data.get("phone", "")
+    txn_id    = payment_data.get("txn_id", "N/A")
+    shop_name = payment_data.get("shop_name", "Not provided")
+    amount    = payment_data.get("amount", "₹499")
+    now       = datetime.now().strftime("%d %B %Y, %I:%M %p")
+
+    results = []
+
+    # ── Message Templates ──────────────────────────────────
+
+    user_whatsapp_msg = f"""✅ *Payment Received — Shop AI Agent*
+
+Hello *{name}*! 🎉
+
+Your payment of *{amount}* has been confirmed!
+
+📋 *Details:*
+• Transaction ID : `{txn_id}`
+• Shop Name      : {shop_name}
+• Date & Time    : {now}
+• Plan           : Pro — ₹499/month
+
+⚡ *What happens next?*
+Your account is being activated. You'll receive your FIRST AI inventory report at *8AM tomorrow* on this WhatsApp number!
+
+Thank you for choosing *Shop AI Agent* 🏪
+Questions? Reply to this message anytime!"""
+
+    admin_whatsapp_msg = f"""🔔 *NEW PAYMENT RECEIVED!*
+
+💰 *{amount}* — Pro Plan
+
+👤 *Customer Details:*
+• Name        : {name}
+• Email       : {email}
+• WhatsApp    : {phone}
+• Shop Name   : {shop_name}
+• Txn ID      : {txn_id}
+• Time        : {now}
+
+⚡ Action needed: Verify the payment in your UPI app and activate the account!"""
+
+    user_email_subject = f"✅ Payment Confirmed — Shop AI Agent ({txn_id})"
+    user_email_body = f"""<h2>✅ Payment Confirmed!</h2>
+<p>Hello <strong>{name}</strong>,</p>
+<p>Your payment of <strong>{amount}</strong> for <strong>Shop AI Agent Pro Plan</strong> has been received successfully!</p>
+<table style="border-collapse:collapse;margin:16px 0">
+  <tr><td style="padding:6px 16px 6px 0;color:#888">Transaction ID</td><td style="font-family:monospace;font-weight:bold">{txn_id}</td></tr>
+  <tr><td style="padding:6px 16px 6px 0;color:#888">Shop Name</td><td>{shop_name}</td></tr>
+  <tr><td style="padding:6px 16px 6px 0;color:#888">Amount</td><td><strong>{amount}/month</strong></td></tr>
+  <tr><td style="padding:6px 16px 6px 0;color:#888">Date</td><td>{now}</td></tr>
+</table>
+<p>Your account is being set up. You'll receive your <strong>first AI inventory report at 8AM tomorrow</strong> on WhatsApp and Email!</p>
+<p>Thank you for choosing Shop AI Agent 🏪</p>
+<hr>
+<p style="color:#888;font-size:12px">Shop AI Agent — Built for Indian shop owners. Powered by AI.</p>"""
+
+    # ── 1. Send WhatsApp to USER ────────────────────────────
+    try:
+        from twilio.rest import Client
+        account_sid = os.getenv("TWILIO_ACCOUNT_SID")
+        auth_token  = os.getenv("TWILIO_AUTH_TOKEN")
+        from_number = os.getenv("TWILIO_WHATSAPP_FROM", "whatsapp:+14155238886")
+
+        if account_sid and auth_token:
+            client = Client(account_sid, auth_token)
+            # Normalize user phone to WhatsApp format
+            user_phone = phone.strip()
+            if not user_phone.startswith("whatsapp:"):
+                if not user_phone.startswith("+"):
+                    user_phone = "+91" + user_phone.lstrip("0")
+                user_phone = "whatsapp:" + user_phone
+
+            client.messages.create(
+                body = user_whatsapp_msg,
+                from_ = from_number,
+                to    = user_phone
+            )
+            print(f"✅ User WhatsApp sent to {user_phone}")
+            results.append("user_whatsapp: sent")
+        else:
+            results.append("user_whatsapp: skipped (no Twilio creds)")
+    except Exception as e:
+        print(f"❌ User WhatsApp error: {e}")
+        results.append(f"user_whatsapp: failed ({e})")
+
+    # ── 2. Send WhatsApp to ADMIN ───────────────────────────
+    try:
+        from twilio.rest import Client
+        account_sid = os.getenv("TWILIO_ACCOUNT_SID")
+        auth_token  = os.getenv("TWILIO_AUTH_TOKEN")
+        from_number = os.getenv("TWILIO_WHATSAPP_FROM", "whatsapp:+14155238886")
+        admin_phone = os.getenv("OWNER_WHATSAPP", "whatsapp:+919985784511")
+
+        if account_sid and auth_token:
+            client = Client(account_sid, auth_token)
+            client.messages.create(
+                body  = admin_whatsapp_msg,
+                from_ = from_number,
+                to    = admin_phone
+            )
+            print(f"✅ Admin WhatsApp sent to {admin_phone}")
+            results.append("admin_whatsapp: sent")
+        else:
+            results.append("admin_whatsapp: skipped (no Twilio creds)")
+    except Exception as e:
+        print(f"❌ Admin WhatsApp error: {e}")
+        results.append(f"admin_whatsapp: failed ({e})")
+
+    # ── 3. Send Telegram to ADMIN ───────────────────────────
+    try:
+        import httpx
+        bot_token = os.getenv("TELEGRAM_BOT_TOKEN")
+        chat_id   = os.getenv("TELEGRAM_CHAT_ID")
+
+        if bot_token and chat_id:
+            tg_msg = f"""🔔 *NEW PAYMENT RECEIVED!*
+
+💰 *{amount}* — Pro Plan
+
+👤 *Customer:* {name}
+📱 *Phone:* {phone}
+📧 *Email:* {email}
+🏪 *Shop:* {shop_name}
+🧾 *Txn ID:* `{txn_id}`
+🕐 *Time:* {now}
+
+⚡ Verify in UPI app & activate account!"""
+
+            url  = f"https://api.telegram.org/bot{bot_token}/sendMessage"
+            resp = httpx.post(url, json={
+                "chat_id": chat_id,
+                "text": tg_msg,
+                "parse_mode": "Markdown"
+            }, timeout=10)
+            if resp.status_code == 200:
+                print("✅ Admin Telegram sent!")
+                results.append("admin_telegram: sent")
+            else:
+                results.append(f"admin_telegram: failed ({resp.text})")
+        else:
+            results.append("admin_telegram: skipped (no Telegram creds)")
+    except Exception as e:
+        print(f"❌ Telegram error: {e}")
+        results.append(f"admin_telegram: failed ({e})")
+
+    # ── 4. Send Email to USER via Brevo ─────────────────────
+    try:
+        import httpx
+        brevo_key = os.getenv("BREVO_API_KEY")
+
+        if brevo_key and email:
+            url  = "https://api.brevo.com/v3/smtp/email"
+            payload = {
+                "sender":      {"name": "Shop AI Agent",  "email": os.getenv("SENDER_EMAIL", "bunnyrangu29@gmail.com")},
+                "to":          [{"email": email, "name": name}],
+                "subject":     user_email_subject,
+                "htmlContent": user_email_body
+            }
+            resp = httpx.post(url, json=payload, headers={
+                "api-key": brevo_key,
+                "Content-Type": "application/json"
+            }, timeout=10)
+            if resp.status_code in (200, 201):
+                print(f"✅ Confirmation email sent to {email}")
+                results.append("user_email: sent")
+            else:
+                results.append(f"user_email: failed ({resp.text})")
+        else:
+            results.append("user_email: skipped (no Brevo key or email)")
+    except Exception as e:
+        print(f"❌ Email error: {e}")
+        results.append(f"user_email: failed ({e})")
+
+    print(f"\n📋 Payment confirmation results: {results}")
+
+
+# =====================================================
+# AI CHAT ENDPOINT — Powered by Groq LLaMA 3.3 70B
+# =====================================================
+
+@router.post("/api/ai-chat")
+async def ai_chat(payload: dict, db: Session = Depends(get_db)):
+    """
+    Chat with the AI expert about your inventory.
+    Uses today's live inventory from DB as context.
+    Powered by Groq LLaMA 3.3 70B.
+    """
+    question = payload.get("question", "").strip()
+    if not question:
+        return {"answer": "Please ask a question!"}
+
+    try:
+        from agents.groq_agents import call_groq
+
+        # Get today's live inventory as context
+        today = date.today().strftime("%Y-%m-%d")
+        items = db.query(InventorySnapshot).filter(
+            InventorySnapshot.snapshot_date == today
+        ).all()
+
+        # Build inventory context text for the AI
+        if items:
+            inventory_context = "\n".join([
+                f"- {i.product_name}: Stock={i.stock_qty}, "
+                f"Expiry={i.expiry_date}, Price=Rs.{i.price}, "
+                f"Status={i.expiry_status}/{i.stock_status}"
+                for i in items
+            ])
+        else:
+            inventory_context = "No inventory data for today yet. Run a report first from the dashboard."
+
+        system_prompt = (
+            "You are a smart, friendly AI expert for a small Indian shop owner.\n"
+            "You have access to the shop's live inventory data shown below.\n"
+            "Answer questions clearly and directly. Use Rs. for prices.\n"
+            "Give specific, actionable advice. Be concise (max 6-8 lines).\n"
+            "Use bullet points where helpful. Be warm and supportive.\n\n"
+            f"TODAY'S LIVE INVENTORY:\n{inventory_context}"
+        )
+
+        answer = call_groq(system_prompt, question)
+
+        if not answer:
+            return {"answer": "AI is unavailable right now. Please check your GROQ_API_KEY in .env file."}
+
+        return {"answer": answer}
+
+    except Exception as e:
+        print(f"AI chat error: {e}")
+        return {"answer": f"Error: {str(e)}"}
