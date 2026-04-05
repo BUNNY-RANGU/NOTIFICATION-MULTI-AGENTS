@@ -1,6 +1,6 @@
 # 🏪 Shop AI Agent — Multi-Agent Inventory Alert System
 
-> Built by [Your Name] | B.Tech 2nd Year | Python Full Stack Developer
+> Built by [RANGU SUCHANDRA] | B.Tech 2nd Year | Python Full Stack Developer
 
 An autonomous multi-agent AI system that reads shop inventory 
 from Google Sheets, detects problems before the owner loses money, 
@@ -178,10 +178,9 @@ Sugar: LOW STOCK! Only 3 units left!
 
 ## 👤 Built By
 
-**[Your Name]**
-B.Tech 2nd Year | Python Full Stack Developer
-- GitHub: github.com/yourusername
-- LinkedIn: linkedin.com/in/yourusername
+**Rangu Suchandra**
+B.Tech 2nd Year | AI  Python Full Stack Developer
+- GitHub: github.com/BUNNY-RANGU
 
 ---
 ⭐ Star this repo if it helped you!
